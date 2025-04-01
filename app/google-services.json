@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "188249747374",
+    "project_id": "fitlog-f3101",
+    "storage_bucket": "fitlog-f3101.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:188249747374:android:b902407d3b99c6d9dfe23f",
+        "android_client_info": {
+          "package_name": "com.example.fitlog"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDS8G3ODITG2YL8Yk0yV-eGlAFfGBEkH8o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
