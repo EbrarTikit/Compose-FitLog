@@ -11,26 +11,18 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+private val LightColors = lightColorScheme(
+    primary = PrimaryPurple,
+    secondary = LightPurple5,
+    background = LightPurple1,
+    onBackground = DarkBlue2
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+private val DarkColors = darkColorScheme(
+    primary = DarkPurple1,
+    secondary = DarkPurple2,
+    background = DarkBlue1,
+    onBackground = LightPurple2
 )
 
 @Composable
@@ -46,8 +38,8 @@ fun FitLogTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> DarkColors
+        else -> LightColors
     }
 
     MaterialTheme(
