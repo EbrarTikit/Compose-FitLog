@@ -19,13 +19,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.fitlog.data.model.Onboarding
 import com.example.fitlog.ui.components.ButtonUI
 import com.example.fitlog.ui.components.PageIndicator
+import com.example.fitlog.ui.navigation.ScreenRoute
 import kotlinx.coroutines.launch
 
 @Composable
-fun OnboardingScreen(onFinished: () -> Unit) {
+fun OnboardingScreen(navController: NavController, onFinish: () -> Unit) {
     val pages = listOf(Onboarding.First, Onboarding.Second, Onboarding.Third)
 
     val pagerState = rememberPagerState(initialPage = 0) {
@@ -93,7 +95,7 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                             if (pagerState.currentPage < pages.size - 1) {
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)
                             } else {
-                                onFinished()
+                                onFinish()
                             }
                         }
                     }
@@ -111,8 +113,3 @@ fun OnboardingScreen(onFinished: () -> Unit) {
 
 }
 
-@Preview
-@Composable
-fun OnboardingScreenPreview() {
-    OnboardingScreen(onFinished = {})
-}
