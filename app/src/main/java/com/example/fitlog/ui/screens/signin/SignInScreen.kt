@@ -30,11 +30,11 @@ fun SignInScreen(
     onSignInSuccess: () -> Unit,
     onSignUpClick: () -> Unit
 ) {
-
+    // Reset error state when screen is launched
     LaunchedEffect(Unit) {
         viewModel.resetErrorState()
     }
-
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -46,9 +46,9 @@ fun SignInScreen(
                 .padding(24.dp)
         ) {
             SignInHeader()
-
+            
             Spacer(modifier = Modifier.height(32.dp))
-
+            
             SignInForm(
                 email = viewModel.email,
                 onEmailChange = viewModel::onEmailChange,
@@ -57,26 +57,28 @@ fun SignInScreen(
                 passwordVisible = viewModel.passwordVisible,
                 onTogglePasswordVisibility = viewModel::togglePasswordVisibility
             )
-
+            
             ForgotPasswordLink()
-
+            
             Spacer(modifier = Modifier.weight(1f))
-
+            
             SignInButton(
                 isLoading = viewModel.isLoading,
                 onClick = viewModel::login
             )
-
+            
             Spacer(modifier = Modifier.height(16.dp))
-
+            
             SignUpLink(onSignUpClick = onSignUpClick)
-
+            
+            // Show error if login fails
             viewModel.errorMessage?.let { error ->
                 ErrorMessage(error)
             }
         }
     }
-
+    
+    // Navigate to home screen on successful login
     LaunchedEffect(viewModel.loginSuccess) {
         if (viewModel.loginSuccess == true) {
             onSignInSuccess()
@@ -117,9 +119,9 @@ fun SignInForm(
         email = email,
         onEmailChange = onEmailChange
     )
-
+    
     Spacer(modifier = Modifier.height(16.dp))
-
+    
     PasswordField(
         password = password,
         onPasswordChange = onPasswordChange,
@@ -166,7 +168,7 @@ fun ForgotPasswordLink() {
             .padding(top = 8.dp)
     ) {
         TextButton(
-            onClick = { /* TODO: */ },
+            onClick = { /* Handle forgot password */ },
             modifier = Modifier.align(androidx.compose.ui.Alignment.CenterEnd)
         ) {
             Text(
