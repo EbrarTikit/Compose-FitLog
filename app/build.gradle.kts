@@ -82,4 +82,13 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
+    // DataStore Preferences
+    implementation(libs.androidx.datastore.preferences)
+
+    // For collectAsStateWithLifecycle
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
+    //Splash Screen
+    implementation(libs.androidx.core.splashscreen)
+
 }
