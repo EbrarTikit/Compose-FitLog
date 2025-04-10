@@ -1,5 +1,6 @@
 package com.example.fitlog.ui.screens.home
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,8 +31,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -120,31 +129,33 @@ fun RecentWorkoutsSection(recentWorkouts: List<WorkoutSummary>) {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         Text(
             text = "Latest Workout",
-            fontSize = 20.sp,
+            fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
         recentWorkouts.forEach { workout ->
             WorkoutItemCard(workout)
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
 fun WorkoutItemCard(workout: WorkoutSummary) {
+    val density = LocalDensity.current
+    val tertiaryColor = MaterialTheme.colorScheme.tertiary
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp),
-        shape = RoundedCornerShape(16.dp),
+            .height(90.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Row(
             modifier = Modifier
@@ -154,15 +165,31 @@ fun WorkoutItemCard(workout: WorkoutSummary) {
         ) {
             Box(
                 modifier = Modifier
-                    .size(50.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(LightPurple2.copy(alpha = 0.2f)),
+                    .size(60.dp)
+                    .padding(4.dp)
+                    .shadow(
+                        elevation = 10.dp,
+                        shape = RoundedCornerShape(16.dp),
+                        spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                    )
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+                            ),
+                            start = Offset.Zero,
+                            end = Offset.Infinite
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
                     painter = painterResource(id = workout.image),
                     contentDescription = null,
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier.size(35.dp),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
                 )
             }
 
@@ -175,28 +202,37 @@ fun WorkoutItemCard(workout: WorkoutSummary) {
                     text = workout.name,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurface
                 )
+
                 Text(
                     text = "${workout.calories} Calories Burn | ${workout.duration} minutes",
-                    fontSize = 12.sp,
-                    color = Color.Gray
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Progress indicator
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(4.dp)
-                        .background(Color.LightGray.copy(alpha = 0.3f), RoundedCornerShape(2.dp))
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(Color.LightGray.copy(alpha = 0.3f))
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(workout.progress)
-                            .height(4.dp)
-                            .background(PrimaryPurple, RoundedCornerShape(2.dp))
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(
+                                Brush.horizontalGradient(
+                                    colors = listOf(
+                                        MaterialTheme.colorScheme.primary,
+                                        MaterialTheme.colorScheme.tertiary
+                                    )
+                                )
+                            )
                     )
                 }
             }
@@ -205,32 +241,39 @@ fun WorkoutItemCard(workout: WorkoutSummary) {
 
             Box(
                 modifier = Modifier
-                    .size(28.dp)
+                    .size(34.dp)
                     .clip(CircleShape)
-                    .background(LightPurple2.copy(alpha = 0.2f)),
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                            )
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_arrow_right),
                     contentDescription = null,
-                    tint = PrimaryPurple,
-                    modifier = Modifier.size(16.dp)
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
     }
 }
 
+
 @Composable
 fun ActivityStatusSection(activityStats: ActivityStats) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Text(
             text = "Activity Status",
-            fontSize = 20.sp,
+            fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
         Row(
@@ -269,171 +312,205 @@ fun ActivityStatusCard(
 ) {
     Card(
         modifier = modifier
-            .height(100.dp),
-        shape = RoundedCornerShape(16.dp),
+            .height(120.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.95f)
+            containerColor = Color.White
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Arka plan dekoratif çizgi çizen canvas
-            androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
+            // Futuristic background pattern
+            Canvas(modifier = Modifier.fillMaxSize()) {
                 val canvasWidth = size.width
                 val canvasHeight = size.height
 
-                drawLine(
-                    color = iconTint.copy(alpha = 0.1f),
-                    start = Offset(0f, canvasHeight * 0.7f),
-                    end = Offset(canvasWidth, canvasHeight * 0.7f),
-                    strokeWidth = 2.dp.toPx()
-                )
-            }
-        }
+                // Draw curved lines
+                for (i in 0..5) {
+                    val startY = canvasHeight * (0.3f + (i * 0.1f))
+                    val controlY = canvasHeight * (0.5f + (i * 0.05f))
+                    val endY = canvasHeight * (0.3f + (i * 0.1f))
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = title,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Gray
-                )
-
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(iconTint.copy(alpha = 0.15f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = iconId),
-                        contentDescription = null,
-                        tint = iconTint,
-                        modifier = Modifier.size(18.dp)
+                    drawPath(
+                        path = Path().apply {
+                            moveTo(0f, startY)
+                            quadraticBezierTo(canvasWidth / 2, controlY, canvasWidth, endY)
+                        },
+                        color = iconTint.copy(alpha = 0.03f),
+                        style = Stroke(width = 1.dp.toPx())
                     )
                 }
             }
 
-            Column {
-                Text(
-                    text = value,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(13.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = title,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
 
-                Text(
-                    text = unit,
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .shadow(8.dp, CircleShape, spotColor = iconTint.copy(alpha = 0.3f))
+                            .clip(CircleShape)
+                            .background(
+                                Brush.radialGradient(
+                                    colors = listOf(
+                                        iconTint.copy(alpha = 0.2f),
+                                        iconTint.copy(alpha = 0.1f)
+                                    )
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = iconId),
+                            contentDescription = null,
+                            tint = iconTint,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
+
+                Column {
+                    Text(
+                        text = value,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Text(
+                        text = unit,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
-
     }
 }
 
+
 @Composable
 fun DailyPlanSection(dailyPlan: DailyPlan, onCheckWorkoutClick: () -> Unit) {
+    val primaryColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+
     Column(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth()
     ) {
         Text(
             text = "My Plan",
-            fontSize = 20.sp,
+            fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
+
         Text(
             text = dailyPlan.day,
             fontSize = 14.sp,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(110.dp),
-            shape = RoundedCornerShape(16.dp),
+                .height(100.dp),
+            shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
-                containerColor = LightPurple2.copy(alpha = 0.7f)
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
             ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+            Box(
+                modifier = Modifier.fillMaxSize()
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_energy),
-                        contentDescription = null,
-                        modifier = Modifier.size(40.dp)
-                    )
+                // Background pattern (dots or lines for futuristic feel)
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val canvasWidth = size.width
+                    val dotSpacing = 20.dp.toPx()
 
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    Column {
-                        Text(
-                            text = dailyPlan.workoutType,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Color.Black
-                        )
-                        Text(
-                            text =  "${dailyPlan.dayOfWeek} of week",
-                            fontSize = 12.sp,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.DarkGray
+                    for (x in 0..canvasWidth.toInt() step dotSpacing.toInt()) {
+                        drawCircle(
+                            color = primaryColor,
+                            radius = 2.dp.toPx(),
+                            center = Offset(x.toFloat(), size.height * 0.8f)
                         )
                     }
                 }
 
-                Button(
-                    onClick = { onCheckWorkoutClick() },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = PrimaryPurple.copy(alpha = 0.9f)
-                    ),
+                Row(
                     modifier = Modifier
-                        .height(36.dp)
-                        .fillMaxWidth(0.85f),
-                    shape = RoundedCornerShape(20.dp), // Tam yuvarlak buton
-                    contentPadding = PaddingValues(horizontal = 16.dp)
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = "Check Workout",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.5.sp,
-                        color = Color.White
-                    )
-                }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
 
+                        Image(
+                                painter = painterResource(id = R.drawable.ic_energy),
+                                contentDescription = null,
+                                modifier = Modifier.size(30.dp),
+                        )
+
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Column {
+                            Text(
+                                text = dailyPlan.workoutType,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Text(
+                                text = "${dailyPlan.dayOfWeek} of week",
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
+
+                    Button(
+                        onClick = onCheckWorkoutClick,
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                        modifier = Modifier.height(40.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp)
+                    ) {
+                        Text(
+                            text = "Check Workout",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
-
     }
 }
+
 
 @Composable
 fun UserGreetingSection(
@@ -441,42 +518,58 @@ fun UserGreetingSection(
     currentDate: String
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            Surface(
-                modifier = Modifier.size(60.dp),
-                shape = CircleShape
+            Box(
+                modifier = Modifier
+                    .size(60.dp)
+                    .shadow(
+                        elevation = 10.dp,
+                        shape = CircleShape,
+                        spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                        ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                    )
+                    .clip(CircleShape)
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.9f),
+                                Color.White.copy(alpha = 0.7f)
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.Center
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.user),
                     contentDescription = null,
                     modifier = Modifier
-                        .padding(8.dp)
-                        .size(60.dp),
+                        .size(50.dp),
                     alignment = Alignment.Center
                 )
             }
 
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(16.dp))
 
-            Column(
-                modifier = Modifier.align(Alignment.CenterVertically)
-            ) {
+            Column {
                 Text(
-                    text = "Hello, $userName!",
-                    fontSize = 14.sp,
+                    text = "Hello, $userName",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleMedium
                 )
 
                 Text(
                     text = currentDate,
                     fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -484,16 +577,33 @@ fun UserGreetingSection(
 
         IconButton(
             onClick = {},
-            modifier = Modifier.padding(end = 12.dp)
+            modifier = Modifier
+                .padding(end = 8.dp)
+                .size(44.dp)
+                .shadow(
+                    elevation = 5.dp,
+                    shape = CircleShape,
+                    spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                )
+                .clip(CircleShape)
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+                        )
+                    )
+                )
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_calendar),
                 contentDescription = null,
-                modifier = Modifier.size(30.dp)
+                modifier = Modifier.size(24.dp)
             )
         }
     }
 }
+
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
 @Composable
