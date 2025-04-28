@@ -6,13 +6,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -38,7 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,8 +46,6 @@ import com.example.fitlog.R
 import com.example.fitlog.data.model.ActivityStats
 import com.example.fitlog.data.model.DailyPlan
 import com.example.fitlog.data.model.WorkoutSummary
-import com.example.fitlog.ui.theme.LightPurple2
-import com.example.fitlog.ui.theme.PrimaryPurple
 
 
 @Composable
@@ -467,9 +462,9 @@ fun DailyPlanSection(dailyPlan: DailyPlan, onCheckWorkoutClick: () -> Unit) {
                     ) {
 
                         Image(
-                                painter = painterResource(id = R.drawable.ic_energy),
-                                contentDescription = null,
-                                modifier = Modifier.size(30.dp),
+                            painter = painterResource(id = R.drawable.ic_energy),
+                            contentDescription = null,
+                            modifier = Modifier.size(30.dp),
                         )
 
 
@@ -639,8 +634,6 @@ fun RecentWorkoutsSectionPreview() {
         RecentWorkoutsSection(recentWorkouts = recentWorkouts)
     }
 }
-
-
 
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
