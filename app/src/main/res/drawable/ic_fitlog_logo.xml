@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="240dp"
+    android:viewportWidth="240"
+    android:viewportHeight="240">
+
+    <!-- Outer circle -->
+    <path
+        android:name="outer_circle"
+        android:pathData="M120,120 m-110,0 a110,110 0 1,0 220,0 a110,110 0 1,0 -220,0"
+        android:strokeColor="#2E7D32"
+        android:strokeWidth="4"
+        android:strokeLineJoin="round"
+        android:fillColor="@android:color/transparent" />
+
+    <!-- Inner circle - representing a fitness tracker/watch -->
+    <path
+        android:name="inner_circle"
+        android:pathData="M120,120 m-85,0 a85,85 0 1,0 170,0 a85,85 0 1,0 -170,0"
+        android:strokeColor="#43A047"
+        android:strokeWidth="3"
+        android:fillColor="@android:color/transparent" />
+
+    <!-- Dumbbell bar horizontal -->
+    <path
+        android:name="dumbbell_bar"
+        android:pathData="M75,120 L165,120"
+        android:strokeColor="#1565C0"
+        android:strokeWidth="10"
+        android:strokeLineCap="round" />
+
+    <!-- Left dumbbell weight -->
+    <path
+        android:name="left_weight_outer"
+        android:pathData="M60,95 L75,95 L75,145 L60,145 Z"
+        android:fillColor="#1565C0" />
+
+    <path
+        android:name="left_weight_inner"
+        android:pathData="M50,100 L60,100 L60,140 L50,140 Z"
+        android:fillColor="#1565C0" />
+
+    <!-- Right dumbbell weight -->
+    <path
+        android:name="right_weight_outer"
+        android:pathData="M165,95 L180,95 L180,145 L165,145 Z"
+        android:fillColor="#1565C0" />
+
+    <path
+        android:name="right_weight_inner"
+        android:pathData="M180,100 L190,100 L190,140 L180,140 Z"
+        android:fillColor="#1565C0" />
+
+    <!-- Heart rate line -->
+    <path
+        android:name="heart_rate_line"
+        android:pathData="M55,120 L75,120 L85,90 L100,150 L120,100 L140,140 L150,120 L165,120 L185,120"
+        android:strokeColor="#E53935"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="@android:color/transparent" />
+
+    <!-- Calendar dots representing workout logging -->
+    <path
+        android:name="calendar_dot_1"
+        android:pathData="M100,55 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0"
+        android:fillColor="#FFA000" />
+
+    <path
+        android:name="calendar_dot_2"
+        android:pathData="M120,55 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0"
+        android:fillColor="#FFA000" />
+
+    <path
+        android:name="calendar_dot_3"
+        android:pathData="M140,55 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0"
+        android:fillColor="#FFA000" />
+
+    <!-- Calendar frame -->
+    <path
+        android:name="calendar_frame"
+        android:pathData="M90,45 L160,45 L160,65 L90,65 Z"
+        android:strokeColor="#FFA000"
+        android:strokeWidth="3"
+        android:fillColor="@android:color/transparent" />
+
+    <!-- Stopwatch -->
+    <path
+        android:name="stopwatch_circle"
+        android:pathData="M120,185 m-20,0 a20,20 0 1,0 40,0 a20,20 0 1,0 -40,0"
+        android:strokeColor="#7B1FA2"
+        android:strokeWidth="3"
+        android:fillColor="@android:color/transparent" />
+
+    <path
+        android:name="stopwatch_top"
+        android:pathData="M120,165 L120,160 L115,155 L125,155 L120,160"
+        android:fillColor="#7B1FA2" />
+
+    <path
+        android:name="stopwatch_hand"
+        android:pathData="M120,185 L120,170"
+        android:strokeColor="#7B1FA2"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
+</vector>
