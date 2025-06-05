@@ -11,6 +11,7 @@ import com.example.fitlog.ui.screens.home.HomeScreen
 import com.example.fitlog.ui.screens.onboarding.OnboardingScreen
 import com.example.fitlog.ui.screens.signin.SignInScreen
 import com.example.fitlog.ui.screens.signup.SignUpScreen
+import com.example.fitlog.ui.screens.splash.SplashScreen
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
@@ -39,9 +40,12 @@ fun FitLogNavGraph(
     if (startDestination != null) {
         NavHost(
             navController = navController,
-            startDestination = startDestination!!,
+            startDestination = ScreenRoute.Splash.route,
             modifier = modifier
         ) {
+            composable(ScreenRoute.Splash.route) {
+                SplashScreen(navController = navController)
+            }
             composable(ScreenRoute.Onboarding.route) {
                 OnboardingScreen(
                     navController = navController,

@@ -3,10 +3,4 @@
 
     <style name="Theme.FitLog" parent="android:Theme.Material.Light.NoActionBar" />
 
-    <style name="Theme.FitLog.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#E9DDFF</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/logo1</item>
-        <item name="windowSplashScreenAnimationDuration">2000</item>
-        <item name="postSplashScreenTheme">@style/Theme.FitLog</item>
-    </style>
 </resources>
