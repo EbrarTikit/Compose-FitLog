@@ -1,5 +1,7 @@
 package com.example.fitlog.ui.screens.home
 
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,6 +28,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,51 +43,72 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.example.fitlog.R
 import com.example.fitlog.data.model.ActivityStats
 import com.example.fitlog.data.model.DailyPlan
 import com.example.fitlog.data.model.WorkoutSummary
+import com.google.android.material.datepicker.MaterialDatePicker
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
+    val context = LocalContext.current
+
     val userName = "Linh!"
-    val currentDate = "Thursday, 08 July"
-    val dailyPlan = DailyPlan("Thursday", "Upper Body", "2")
-    val activityStats = ActivityStats(calories = 620.68f, steps = 1240)
-    val recentWorkouts = listOf(
-        WorkoutSummary(
-            id = "1",
-            name = "FullBody Workout",
-            calories = 180,
-            duration = 20,
-            image = R.drawable.ic_run,
-            progress = 0.7f
-        ),
-        WorkoutSummary(
-            id = "2",
-            name = "FullBody Workout",
-            calories = 180,
-            duration = 20,
-            image = R.drawable.ic_run,
-            progress = 0.5f
-        )
-    )
+    val currentDate by remember { derivedStateOf { viewModel.selectedDate.value.toString() } }
+
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    val dailyPlan by remember { viewModel.dailyPlan }
+    val activityStats by remember { viewModel.activityStats }
+    val recentWorkouts by remember { viewModel.recentWorkouts }
+
 
     HomeContent(
-        userName = userName,
+        userName = "Ebrar!",
         currentDate = currentDate,
         dailyPlan = dailyPlan,
         activityStats = activityStats,
         recentWorkouts = recentWorkouts,
-        onCheckWorkoutClick = {}
+        onCheckWorkoutClick = {},
+        onCalendarClick = {showDatePicker = true}
     )
+
+    if (showDatePicker) {
+        AndroidView(factory = { ctx ->
+            val datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Tarih Seçin")
+                .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                .build()
+
+            datePicker.addOnPositiveButtonClickListener { millis ->
+                val instant = Instant.ofEpochMilli(millis)
+                val zoneId = ZoneId.systemDefault()
+                val localDate = instant.atZone(zoneId).toLocalDate()
+                viewModel.onDateSelected(localDate)
+                showDatePicker = false
+            }
+
+            datePicker.addOnDismissListener { showDatePicker = false }
+
+            datePicker.show((ctx as AppCompatActivity).supportFragmentManager, "DATE_PICKER")
+            View(ctx)
+        })
+    }
 }
 
 @Composable
@@ -91,6 +119,7 @@ private fun HomeContent(
     activityStats: ActivityStats,
     recentWorkouts: List<WorkoutSummary>,
     onCheckWorkoutClick: () -> Unit,
+    onCalendarClick: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -101,7 +130,7 @@ private fun HomeContent(
                 .fillMaxSize()
                 .padding(vertical = 16.dp)
         ) {
-            UserGreetingSection(userName, currentDate)
+            UserGreetingSection(userName, currentDate, onCalendarClick)
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -510,7 +539,8 @@ fun DailyPlanSection(dailyPlan: DailyPlan, onCheckWorkoutClick: () -> Unit) {
 @Composable
 fun UserGreetingSection(
     userName: String,
-    currentDate: String
+    currentDate: String,
+    onCalendarClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -571,7 +601,7 @@ fun UserGreetingSection(
         }
 
         IconButton(
-            onClick = {},
+            onClick = onCalendarClick,
             modifier = Modifier
                 .padding(end = 8.dp)
                 .size(44.dp)
@@ -654,7 +684,7 @@ fun ActivityStatusSectionPreview() {
 @Preview(showBackground = true)
 @Composable
 fun UserGreetingSectionPreview() {
-    UserGreetingSection(userName = "John Doe", currentDate = "Thursday, 08 July")
+    UserGreetingSection(userName = "John Doe", currentDate = "Thursday, 08 July", onCalendarClick = {})
 }
 
 @Preview(showBackground = true)
