@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.fitlog.data.local.preferences.UserPreferences
 import com.example.fitlog.ui.screens.daylist.DayListScreen
+import com.example.fitlog.ui.screens.detail.DetailScreen
 import com.example.fitlog.ui.screens.editworkout.EditWorkoutScreen
 import com.example.fitlog.ui.screens.home.HomeScreen
 import com.example.fitlog.ui.screens.onboarding.OnboardingScreen
@@ -106,9 +107,36 @@ fun FitLogNavGraph(
                     },
                     onSeeAllClick = { date ->
                         println("See all clicked for $date")
+                        navController.navigate(ScreenRoute.Detail.route)
                     }
                 )
             }
+
+            composable(ScreenRoute.Detail.route) {
+                DetailScreen(
+                    workoutsForDate = { date ->
+                        // Dummy data
+                        if (date.dayOfMonth % 2 == 0) {
+                            listOf(
+                                "Push-ups" to "3 sets",
+                                "Squats" to "4 sets"
+                            )
+                        } else {
+                            emptyList()
+                        }
+                    },
+                    onEditWorkoutClick = {
+                        navController.navigate(ScreenRoute.EditWorkout.route)
+                    },
+                    onAddWorkoutClick = {
+                        navController.navigate(ScreenRoute.EditWorkout.route)
+                    },
+                    onAddExerciseClick = {
+                        navController.navigate(ScreenRoute.AddExercise.route)
+                    }
+                )
+            }
+
         }
     }
 }

@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fitlog.ui.theme.LightPurple1
+import com.example.fitlog.ui.theme.LightPurple4
 import com.example.fitlog.ui.theme.PrimaryPurple
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -62,7 +63,8 @@ fun DayListScreen(
                         text = currentMonth.month.getDisplayName(TextStyle.FULL, Locale.ENGLISH) +
                                 " " + currentMonth.year,
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryPurple
                     )
                 }
 
@@ -122,9 +124,9 @@ fun DayListScreen(
                                 .weight(1f)
                                 .aspectRatio(1f)
                                 .padding(2.dp)
-                                .clip(RoundedCornerShape(6.dp))
+                                .clip(RoundedCornerShape(25.dp))
                                 .background(
-                                    if (date == selectedDate) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                                    if (date == selectedDate) LightPurple4
                                     else Color.Transparent
                                 )
                                 .clickable(enabled = date != null) {
@@ -170,7 +172,7 @@ fun DayListScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(18.dp),
                             colors = CardDefaults.cardColors(containerColor = LightPurple1)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
