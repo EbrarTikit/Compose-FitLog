@@ -60,11 +60,15 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import androidx.lifecycle.viewmodel.compose.viewModel
-
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.fitlog.ui.navigation.ScreenRoute
 
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
+fun HomeScreen(
+    navController: NavController,
+    viewModel: HomeViewModel = viewModel()) {
     val context = LocalContext.current
 
     val userName = "Linh!"
@@ -84,7 +88,7 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
         dailyPlan = dailyPlan,
         activityStats = activityStats,
         recentWorkouts = recentWorkouts,
-        onCheckWorkoutClick = {},
+        onCheckWorkoutClick = {navController.navigate(ScreenRoute.DayList.route)},
         onCalendarClick = {showDatePicker = true}
     )
 
@@ -524,7 +528,7 @@ fun DailyPlanSection(dailyPlan: DailyPlan, onCheckWorkoutClick: () -> Unit) {
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp)
                     ) {
                         Text(
-                            text = "Check Workout",
+                            text = "Check",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -634,7 +638,9 @@ fun UserGreetingSection(
 @Composable
 fun HomeScreenPreview() {
     MaterialTheme {
-        HomeScreen()
+        HomeScreen(
+            navController = rememberNavController(),
+        )
     }
 }
 
