@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.fitlog.data.local.preferences.UserPreferences
+import com.example.fitlog.ui.screens.editworkout.EditWorkoutScreen
 import com.example.fitlog.ui.screens.home.HomeScreen
 import com.example.fitlog.ui.screens.onboarding.OnboardingScreen
 import com.example.fitlog.ui.screens.signin.SignInScreen
@@ -70,6 +71,15 @@ fun FitLogNavGraph(
                 )
             }
             composable(ScreenRoute.Home.route) { HomeScreen() }
+            composable(ScreenRoute.EditWorkout.route) {
+                EditWorkoutScreen(
+                    onSave = { name, duration, calories ->
+                        println("Saved: $name, $duration, $calories")
+                        navController.popBackStack()
+                    },
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }
