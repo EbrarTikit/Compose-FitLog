@@ -7,4 +7,5 @@ sealed class ScreenRoute(val route: String) {
     object Onboarding : ScreenRoute("onboarding")
     object Home : ScreenRoute("home")
     object EditWorkout : ScreenRoute("edit_workout")
+    object DayList : ScreenRoute("day_list")
 }

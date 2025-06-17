@@ -2,7 +2,7 @@ package com.example.fitlog.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-
+val LightPurple = Color(0xFFEEEBFC)
 val LightPurple1 = Color(0xFFE9DDFF) // Açık Mor 1
 val LightPurple2 = Color(0xFFE3D8FF) // Açık Mor 2
 val LightPurple3 = Color(0xFFDDD2FF) // Açık Mor 3
