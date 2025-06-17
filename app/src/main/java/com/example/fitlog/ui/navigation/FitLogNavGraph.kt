@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.fitlog.data.local.preferences.UserPreferences
+import com.example.fitlog.ui.screens.daylist.DayListScreen
 import com.example.fitlog.ui.screens.editworkout.EditWorkoutScreen
 import com.example.fitlog.ui.screens.home.HomeScreen
 import com.example.fitlog.ui.screens.onboarding.OnboardingScreen
@@ -78,6 +79,22 @@ fun FitLogNavGraph(
                         navController.popBackStack()
                     },
                     onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(ScreenRoute.DayList.route) {
+                DayListScreen(
+                    workoutsForDate = { date ->
+                        // dummy data
+                        listOf(
+                            "Push-ups" to "3 sets",
+                            "Pull-ups" to "4 sets",
+                            "Squats" to "5 sets"
+                        )
+                    },
+                    onSeeAllClick = { date ->
+                        println("See all clicked for $date")
+                    }
                 )
             }
         }
