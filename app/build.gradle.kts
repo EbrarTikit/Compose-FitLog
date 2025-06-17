@@ -60,11 +60,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    // Firebase Authentication
+    // Firebase
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.firestore.ktx)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.firestore)
 
     // Room Database
     implementation(libs.androidx.room.runtime)
@@ -94,6 +95,9 @@ dependencies {
     implementation(libs.material3)
     implementation(libs.androidx.lifecycle.viewmodel.compose.v262)
     implementation(libs.androidx.material.icons.extended)
+
+    //Material
+    implementation(libs.material)
 
 
 

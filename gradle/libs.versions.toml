@@ -17,6 +17,7 @@ composeBom = "2025.03.01"
 lifecycleRuntimeKtxVersion = "2.8.7"
 lifecycleViewmodelCompose = "2.8.7"
 lifecycleViewmodelComposeVersion = "2.6.2"
+material = "1.12.0"
 material3 = "1.2.0"
 materialIconsExtended = "1.5.4"
 navigationCompose = "2.8.9"
@@ -43,6 +44,7 @@ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version = "23.2.0" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
@@ -59,6 +61,7 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 
 
