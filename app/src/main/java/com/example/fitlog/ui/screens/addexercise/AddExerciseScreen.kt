@@ -2,6 +2,7 @@
 
 package com.example.fitlog.ui.screens.addexercise
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fitlog.R
 import com.example.fitlog.ui.theme.Gray
+import com.example.fitlog.ui.theme.LightPurple
 import com.example.fitlog.ui.theme.LightPurple1
 import com.example.fitlog.ui.theme.OptionTxtColor
 import com.example.fitlog.ui.theme.OptionTxtColor2
@@ -213,41 +215,80 @@ fun AddSetSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onSetTypeClick() },
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Gray)
                 ) {
                     Row(
                         modifier = Modifier.padding(16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Set")
-                        Text(setType)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_dumbell),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                                tint = OptionTxtColor
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Set", fontSize = 16.sp, color = OptionTxtColor)
+                        }
+                        Text(setType, fontSize = 14.sp, color = OptionTxtColor2)
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TextField(
                     value = reps,
                     onValueChange = onRepsChange,
-                    label = { Text("Reps") },
+                    placeholder = { Text("Reps", color = OptionTxtColor) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Gray, RoundedCornerShape(8.dp)),
+                    colors = TextFieldDefaults.colors(
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent
+                    )
                 )
+
+
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
+
+                TextField(
                     value = weight,
                     onValueChange = onWeightChange,
-                    label = { Text("Weight") },
+                    placeholder = { Text("Weight", color = OptionTxtColor) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Gray, RoundedCornerShape(8.dp)),
+                    colors = TextFieldDefaults.colors(
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent
+                    )
                 )
+
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = onAddSet, modifier = Modifier.fillMaxWidth()) {
-                    Text("ADD")
+
+                Button(
+                    onClick = onAddSet,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryPurple)
+                ) {
+                    Text("ADD", color = Color.White)
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun SetTypeSheet(sheetState: SheetState, onSelect: (String) -> Unit) {
@@ -302,3 +343,113 @@ fun ChooseWorkoutSheetPreview() {
         )
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun AddSetSheetContentPreview() {
+    Column(modifier = Modifier.padding(16.dp)) {
+        // Set Type Row
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Gray)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_dumbell),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = OptionTxtColor
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Set", fontSize = 16.sp, color = OptionTxtColor)
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Set 2", fontSize = 14.sp, color = OptionTxtColor2)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_right),
+                        contentDescription = null,
+                        tint = OptionTxtColor2,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Reps Field
+        TextField(
+            value = "",
+            onValueChange = {},
+            placeholder = { Text("Reps", color = OptionTxtColor) },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Gray, RoundedCornerShape(8.dp)),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.Transparent,
+                focusedContainerColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent
+            )
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Weight Field
+        TextField(
+            value = "",
+            onValueChange = {},
+            placeholder = { Text("Weight", color = OptionTxtColor) },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Gray, RoundedCornerShape(8.dp)),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.Transparent,
+                focusedContainerColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent
+            )
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // ADD Button
+        Button(
+            onClick = {},
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = PrimaryPurple)
+        ) {
+            Text("ADD", color = Color.White)
+        }
+    }
+}
+
+
+
+@Preview(showBackground = true)
+@Composable
+fun SetTypeSheetContentPreview() {
+    Column(modifier = Modifier.padding(16.dp)) {
+        listOf("Set", "Warm Up Set", "Burnout Set", "Drop Set").forEach {
+            Text(
+                text = it,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            )
+        }
+    }
+}
+
