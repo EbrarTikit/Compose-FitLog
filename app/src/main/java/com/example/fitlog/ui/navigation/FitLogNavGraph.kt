@@ -13,6 +13,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.fitlog.data.local.preferences.UserPreferences
+import com.example.fitlog.ui.screens.addexercise.AddExerciseScreen
 import com.example.fitlog.ui.screens.daylist.DayListScreen
 import com.example.fitlog.ui.screens.detail.DetailScreen
 import com.example.fitlog.ui.screens.editworkout.EditWorkoutScreen
@@ -136,6 +137,20 @@ fun FitLogNavGraph(
                     }
                 )
             }
+
+            composable(ScreenRoute.AddExercise.route) {
+                AddExerciseScreen(
+                    //dummy data
+                    workouts = listOf("Chest Press", "Squat"),
+                    onAddNewWorkout = {
+                        navController.navigate(ScreenRoute.EditWorkout.route)
+                    },
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
 
         }
     }
