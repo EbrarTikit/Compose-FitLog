@@ -8,10 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fitlog.R
 import com.example.fitlog.ui.theme.Gray
-import com.example.fitlog.ui.theme.LightPurple
 import com.example.fitlog.ui.theme.LightPurple1
 import com.example.fitlog.ui.theme.OptionTxtColor
 import com.example.fitlog.ui.theme.OptionTxtColor2
@@ -295,19 +292,42 @@ fun SetTypeSheet(sheetState: SheetState, onSelect: (String) -> Unit) {
     if (sheetState.isVisible) {
         ModalBottomSheet(onDismissRequest = { }, sheetState = sheetState) {
             Column(modifier = Modifier.padding(16.dp)) {
-                listOf("Set", "Warm Up Set", "Burnout Set", "Drop Set").forEach {
-                    Text(
-                        text = it,
+                val types = listOf(
+                    Triple(R.drawable.ic_s, "Set 2", "Set 2"),
+                    Triple(R.drawable.ic_w, "Warm Up Set", "Warm Up Set"),
+                    Triple(R.drawable.ic_f, "Burnout Set", "Burnout Set"),
+                    Triple(R.drawable.ic_d, "Drop Set", "Drop Set")
+                )
+
+                types.forEach { (icon, label, value) ->
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onSelect(it) }
-                            .padding(8.dp)
-                    )
+                            .padding(vertical = 4.dp)
+                            .clickable { onSelect(value) },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = Gray)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(id = icon),
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = Color.Unspecified
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(label, fontSize = 16.sp)
+                        }
+                    }
                 }
             }
         }
     }
 }
+
 
 data class ExerciseSet(val type: String, val reps: String, val weight: String)
 
@@ -442,14 +462,37 @@ fun AddSetSheetContentPreview() {
 @Composable
 fun SetTypeSheetContentPreview() {
     Column(modifier = Modifier.padding(16.dp)) {
-        listOf("Set", "Warm Up Set", "Burnout Set", "Drop Set").forEach {
-            Text(
-                text = it,
+        val types = listOf(
+            Pair(R.drawable.ic_s, "Set 2"),
+            Pair(R.drawable.ic_w, "Warm Up Set"),
+            Pair(R.drawable.ic_f, "Burnout Set"),
+            Pair(R.drawable.ic_d, "Drop Set")
+        )
+
+        types.forEach { (icon, label) ->
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
-            )
+                    .padding(vertical = 4.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Gray)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.Unspecified
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(label, fontSize = 16.sp)
+                }
+            }
         }
     }
 }
+
 
