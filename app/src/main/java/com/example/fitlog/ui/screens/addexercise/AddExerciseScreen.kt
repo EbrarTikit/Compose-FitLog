@@ -1,4 +1,304 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.fitlog.ui.screens.addexercise
 
-class AddExerciseScreen {
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.fitlog.R
+import com.example.fitlog.ui.theme.Gray
+import com.example.fitlog.ui.theme.LightPurple1
+import com.example.fitlog.ui.theme.OptionTxtColor
+import com.example.fitlog.ui.theme.OptionTxtColor2
+import com.example.fitlog.ui.theme.PrimaryPurple
+import kotlinx.coroutines.launch
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddExerciseScreen(
+    workouts: List<String>,
+    onAddNewWorkout: () -> Unit,
+    onBack: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    val workoutSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val addSetSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val setTypeSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    var selectedWorkout by remember { mutableStateOf<String?>(null) }
+    var sets by remember { mutableStateOf(listOf<ExerciseSet>()) }
+    var tempSetType by remember { mutableStateOf("Set 1") }
+    var tempReps by remember { mutableStateOf("") }
+    var tempWeight by remember { mutableStateOf("") }
+
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                modifier = Modifier
+                    .padding(12.dp),
+                onClick = { scope.launch { addSetSheetState.show() } },
+                containerColor = PrimaryPurple,
+                shape = CircleShape
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "Add Set",
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                }
+                Text("Exercise", fontSize = 20.sp)
+                IconButton(onClick = {}) {
+                    Icon(Icons.Default.MoreVert, contentDescription = "More")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { scope.launch { workoutSheetState.show() } },
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Gray)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_dumbell),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Choose Workout",
+                            fontSize = 16.sp,
+                            color = OptionTxtColor)
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(selectedWorkout ?: "None", fontSize = 14.sp, color = OptionTxtColor2)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_right),
+                            contentDescription = null,
+                            tint = OptionTxtColor2,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            sets.forEach { set ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = LightPurple1)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("${set.type}")
+                        Text("${set.reps} reps, ${set.weight}kg")
+                    }
+                }
+            }
+        }
+    }
+
+    ChooseWorkoutSheet(workoutSheetState, workouts, onSelect = {
+        selectedWorkout = it
+    }, onAddNewWorkout = onAddNewWorkout)
+
+    AddSetSheet(addSetSheetState, tempSetType, tempReps, tempWeight, onSetTypeClick = {
+        scope.launch { setTypeSheetState.show() }
+    }, onRepsChange = { tempReps = it }, onWeightChange = { tempWeight = it }, onAddSet = {
+        sets = sets + ExerciseSet(tempSetType, tempReps, tempWeight)
+    })
+
+    SetTypeSheet(setTypeSheetState, onSelect = {
+        tempSetType = it
+    })
+}
+
+@Composable
+fun ChooseWorkoutSheet(
+    sheetState: SheetState,
+    workouts: List<String>,
+    onSelect: (String) -> Unit,
+    onAddNewWorkout: () -> Unit
+) {
+    if (sheetState.isVisible) {
+        ModalBottomSheet(onDismissRequest = { }, sheetState = sheetState) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                workouts.forEach {
+                    Text(
+                        text = it,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(it) }
+                            .padding(8.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "+ Add New",
+                    color = PrimaryPurple,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onAddNewWorkout() }
+                        .padding(8.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun AddSetSheet(
+    sheetState: SheetState,
+    setType: String,
+    reps: String,
+    weight: String,
+    onSetTypeClick: () -> Unit,
+    onRepsChange: (String) -> Unit,
+    onWeightChange: (String) -> Unit,
+    onAddSet: () -> Unit
+) {
+    if (sheetState.isVisible) {
+        ModalBottomSheet(onDismissRequest = { }, sheetState = sheetState) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onSetTypeClick() },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Set")
+                        Text(setType)
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = reps,
+                    onValueChange = onRepsChange,
+                    label = { Text("Reps") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = weight,
+                    onValueChange = onWeightChange,
+                    label = { Text("Weight") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = onAddSet, modifier = Modifier.fillMaxWidth()) {
+                    Text("ADD")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SetTypeSheet(sheetState: SheetState, onSelect: (String) -> Unit) {
+    if (sheetState.isVisible) {
+        ModalBottomSheet(onDismissRequest = { }, sheetState = sheetState) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                listOf("Set", "Warm Up Set", "Burnout Set", "Drop Set").forEach {
+                    Text(
+                        text = it,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(it) }
+                            .padding(8.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+data class ExerciseSet(val type: String, val reps: String, val weight: String)
+
+@Preview(showBackground = true)
+@Composable
+fun AddExerciseScreenPreview() {
+    AddExerciseScreen(
+        workouts = listOf("Chest Press", "Squat"),
+        onAddNewWorkout = {},
+        onBack = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ChooseWorkoutSheetPreview() {
+    Column(modifier = Modifier.padding(16.dp)) {
+        listOf("Chest Press", "Squat").forEach {
+            Text(
+                text = it,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "+ Add New",
+            color = PrimaryPurple,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        )
+    }
 }

@@ -15,3 +15,7 @@ val DarkPurple1 = Color(0xFF595CCC) // Koyu Mor 1
 val DarkPurple2 = Color(0xFF4049B6) // Koyu Mor 2
 val DarkBlue1 = Color(0xFF052C92) // Koyu Mavi 1
 val DarkBlue2 = Color(0xFF000F6B) // Koyu Mavi 2
+
+val Gray = Color(0xFFF7F8F8)
+val OptionTxtColor = Color(0xFF7B6F72)
+val OptionTxtColor2 = Color(0xFFADA4A5)

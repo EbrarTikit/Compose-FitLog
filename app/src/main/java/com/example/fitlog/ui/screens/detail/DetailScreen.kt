@@ -112,7 +112,9 @@ fun DetailScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         Box(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
             contentAlignment = Alignment.BottomEnd
         ) {
             FloatingActionButton(
@@ -123,6 +125,7 @@ fun DetailScreen(
                         onAddExerciseClick()
                     }
                 },
+                shape = CircleShape,
                 containerColor = PrimaryPurple
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Workout", tint = Color.White)
