@@ -19,3 +19,8 @@ val DarkBlue2 = Color(0xFF000F6B) // Koyu Mavi 2
 val Gray = Color(0xFFF7F8F8)
 val OptionTxtColor = Color(0xFF7B6F72)
 val OptionTxtColor2 = Color(0xFFADA4A5)
+
+val AccentOrange = Color(0xFFFF9800) // Enerji ve motivasyon için
+val AccentGreen = Color(0xFF4CAF50)   // Başarı ve sağlık için
+val AccentRed = Color(0xFFE53935)     // Uyarı ve hata için
+val AccentYellow = Color(0xFFFFC107)  // Bildirim ve uyarı için
