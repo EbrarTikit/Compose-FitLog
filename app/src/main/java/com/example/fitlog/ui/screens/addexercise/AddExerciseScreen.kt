@@ -46,6 +46,8 @@ fun AddExerciseScreen(
     var tempSetType by remember { mutableStateOf("Set 1") }
     var tempReps by remember { mutableStateOf(0) }
     var tempWeight by remember { mutableStateOf(0f) }
+    var tempRepsInput by remember { mutableStateOf("") }
+    var tempWeightInput by remember { mutableStateOf("") }
 
     Scaffold(
         floatingActionButton = {
@@ -151,10 +153,20 @@ fun AddExerciseScreen(
         selectedWorkout = it
     }, onAddNewWorkout = onAddNewWorkout)
 
-    AddSetSheet(addSetSheetState, tempSetType, tempReps, tempWeight, onSetTypeClick = {
+    AddSetSheet(addSetSheetState, tempSetType, tempRepsInput, tempWeightInput, onSetTypeClick = {
         scope.launch { setTypeSheetState.show() }
-    }, onRepsChange = { tempReps = it }, onWeightChange = { tempWeight = it }, onAddSet = {
-        sets = sets + ExerciseSet(tempSetType, tempReps, tempWeight)
+    }, onRepsChange = {
+        tempRepsInput = it
+        tempReps = it.toIntOrNull() ?: 0
+    }, onWeightChange = {
+        tempWeightInput = it
+        tempWeight = it.toFloatOrNull() ?: 0f
+    }, onAddSet = {
+        sets = sets + ExerciseSet(setType = tempSetType, reps = tempReps, weight = tempWeight)
+        tempRepsInput = ""
+        tempWeightInput = ""
+        tempReps = 0
+        tempWeight = 0f
     })
 
     SetTypeSheet(setTypeSheetState, onSelect = {
@@ -199,8 +211,8 @@ fun ChooseWorkoutSheet(
 fun AddSetSheet(
     sheetState: SheetState,
     setType: String,
-    reps: Int,
-    weight: Float,
+    reps: String,
+    weight: String,
     onSetTypeClick: () -> Unit,
     onRepsChange: (String) -> Unit,
     onWeightChange: (String) -> Unit,
@@ -253,7 +265,6 @@ fun AddSetSheet(
                     )
                 )
 
-
                 Spacer(modifier = Modifier.height(8.dp))
 
                 TextField(
@@ -286,7 +297,6 @@ fun AddSetSheet(
         }
     }
 }
-
 
 @Composable
 fun SetTypeSheet(sheetState: SheetState, onSelect: (String) -> Unit) {
@@ -328,9 +338,6 @@ fun SetTypeSheet(sheetState: SheetState, onSelect: (String) -> Unit) {
         }
     }
 }
-
-
-
 
 @Preview(showBackground = true)
 @Composable
@@ -456,8 +463,6 @@ fun AddSetSheetContentPreview() {
         }
     }
 }
-
-
 
 @Preview(showBackground = true)
 @Composable
