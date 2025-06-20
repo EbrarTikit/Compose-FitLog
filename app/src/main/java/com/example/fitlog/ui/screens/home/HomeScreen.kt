@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +25,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -63,7 +65,20 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.fitlog.ui.navigation.ScreenRoute
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 
+data class ActivityStatusItem(
+    val title: String,
+    val value: String,
+    val unit: String,
+    val iconId: Int,
+    val iconColor: Color
+)
 
 @Composable
 fun HomeScreen(
@@ -135,18 +150,47 @@ private fun HomeContent(
                 .padding(vertical = 16.dp)
         ) {
             UserGreetingSection(userName, currentDate, onCalendarClick)
-
             Spacer(modifier = Modifier.height(24.dp))
-
-            DailyPlanSection(dailyPlan, onCheckWorkoutClick)
-
+            Text(
+                text = "My Plan",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+            )
+            if (dailyPlan.workoutType.isBlank() && dailyPlan.dayOfWeek.isBlank()) {
+                MyPlanCardEmpty()
+            } else {
+                MyPlanCard(
+                    workoutType = dailyPlan.workoutType,
+                    dayOfWeek = dailyPlan.dayOfWeek + " of week",
+                    onCheckClick = onCheckWorkoutClick
+                )
+            }
+            Spacer(modifier = Modifier.height(18.dp))
+            // Always show grid, use 0 values if no data
+            val activityItems = if (activityStats.calories == 0f && activityStats.steps == 0) {
+                listOf(
+                    ActivityStatusItem("Calories", "0", "Kcal", com.example.fitlog.R.drawable.ic_fire, Color(0xFFFF5722)),
+                    ActivityStatusItem("Steps", "0", "Steps", com.example.fitlog.R.drawable.ic_run, Color(0xFF1976D2)),
+                    ActivityStatusItem("Distance", "0", "km", com.example.fitlog.R.drawable.ic_run, Color(0xFF43A047)),
+                    ActivityStatusItem("Active", "0", "min", com.example.fitlog.R.drawable.ic_fire, Color(0xFF7C5CFA))
+                )
+            } else {
+                listOf(
+                    ActivityStatusItem("Calories", activityStats.calories.toString(), "Kcal", com.example.fitlog.R.drawable.ic_fire, Color(0xFFFF5722)),
+                    ActivityStatusItem("Steps", activityStats.steps.toString(), "Steps", com.example.fitlog.R.drawable.ic_run, Color(0xFF1976D2)),
+                    ActivityStatusItem("Distance", "2.3", "km", com.example.fitlog.R.drawable.ic_run, Color(0xFF43A047)),
+                    ActivityStatusItem("Active", "45", "min", com.example.fitlog.R.drawable.ic_fire, Color(0xFF7C5CFA))
+                )
+            }
+            ActivityStatusSectionModern(items = activityItems)
             Spacer(modifier = Modifier.height(24.dp))
-
-            ActivityStatusSection(activityStats)
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            RecentWorkoutsSection(recentWorkouts)
+            if (recentWorkouts.isEmpty()) {
+                LatestWorkoutsSectionEmpty()
+            } else {
+                RecentWorkoutsSection(recentWorkouts)
+            }
         }
     }
 }
@@ -294,251 +338,284 @@ fun WorkoutItemCard(workout: WorkoutSummary) {
 
 
 @Composable
-fun ActivityStatusSection(activityStats: ActivityStats) {
+fun ActivityStatusSectionModern(items: List<ActivityStatusItem>) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Text(
             text = "Activity Status",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 12.dp)
         )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 220.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            userScrollEnabled = false // disables scrolling, grid grows to fit content
         ) {
-            ActivityStatusCard(
-                title = "Calories",
-                value = activityStats.calories.toString(),
-                unit = "Kcal",
-                iconId = R.drawable.ic_fire,
-                iconTint = Color(0xFFFF5722),
-                modifier = Modifier.weight(1f)
-            )
-
-            ActivityStatusCard(
-                title = "Steps",
-                value = activityStats.steps.toString(),
-                unit = "Steps",
-                iconId = R.drawable.ic_run,
-                iconTint = Color(0xFF1976D2),
-                modifier = Modifier.weight(1f)
-            )
+            items(items) { item ->
+                ActivityStatusCardModern(item, Modifier.fillMaxWidth())
+            }
         }
     }
 }
 
 @Composable
-fun ActivityStatusCard(
-    title: String,
-    value: String,
-    unit: String,
-    iconId: Int,
-    iconTint: Color,
-    modifier: Modifier
+fun ActivityStatusCardModern(item: ActivityStatusItem, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier.height(90.dp),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(10.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(item.iconColor.copy(alpha = 0.15f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = item.iconId),
+                        contentDescription = null,
+                        tint = item.iconColor,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = item.title,
+                    fontSize = 13.sp,
+                    color = Color(0xFF7C5CFA),
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            Text(
+                text = item.value,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF2D2154)
+            )
+            Text(
+                text = item.unit,
+                fontSize = 11.sp,
+                color = Color(0xFF7C5CFA).copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+
+@Composable
+fun MyPlanCard(
+    workoutType: String,
+    dayOfWeek: String,
+    onCheckClick: () -> Unit
 ) {
     Card(
-        modifier = modifier
-            .height(120.dp),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(72.dp)
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Futuristic background pattern
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val canvasWidth = size.width
-                val canvasHeight = size.height
-
-                // Draw curved lines
-                for (i in 0..5) {
-                    val startY = canvasHeight * (0.3f + (i * 0.1f))
-                    val controlY = canvasHeight * (0.5f + (i * 0.05f))
-                    val endY = canvasHeight * (0.3f + (i * 0.1f))
-
-                    drawPath(
-                        path = Path().apply {
-                            moveTo(0f, startY)
-                            quadraticBezierTo(canvasWidth / 2, controlY, canvasWidth, endY)
-                        },
-                        color = iconTint.copy(alpha = 0.03f),
-                        style = Stroke(width = 1.dp.toPx())
-                    )
-                }
-            }
-
-            Column(
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(13.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF7C5CFA).copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = title,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .shadow(8.dp, CircleShape, spotColor = iconTint.copy(alpha = 0.3f))
-                            .clip(CircleShape)
-                            .background(
-                                Brush.radialGradient(
-                                    colors = listOf(
-                                        iconTint.copy(alpha = 0.2f),
-                                        iconTint.copy(alpha = 0.1f)
-                                    )
-                                )
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(id = iconId),
-                            contentDescription = null,
-                            tint = iconTint,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-                }
-
-                Column {
-                    Text(
-                        text = value,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                    Text(
-                        text = unit,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                Icon(
+                    painter = painterResource(id = com.example.fitlog.R.drawable.ic_energy),
+                    contentDescription = null,
+                    tint = Color(0xFF7C5CFA),
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(14.dp))
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = workoutType,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color(0xFF2D2154)
+                )
+                Text(
+                    text = dayOfWeek,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF7C5CFA).copy(alpha = 0.7f)
+                )
+            }
+            Button(
+                onClick = onCheckClick,
+                shape = RoundedCornerShape(50),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF7C5CFA),
+                    contentColor = Color.White
+                ),
+                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 0.dp),
+                modifier = Modifier.height(36.dp)
+            ) {
+                Text(
+                    text = "Check",
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
         }
     }
 }
 
+@Composable
+fun MyPlanCardEmpty() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(72.dp)
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF7C5CFA).copy(alpha = 0.10f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = com.example.fitlog.R.drawable.ic_energy),
+                    contentDescription = null,
+                    tint = Color(0xFF7C5CFA).copy(alpha = 0.3f),
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(14.dp))
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "No Plan Yet",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color(0xFFB0AFC6)
+                )
+                Text(
+                    text = "Create your first workout plan!",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFFB0AFC6)
+                )
+            }
+        }
+    }
+}
 
 @Composable
-fun DailyPlanSection(dailyPlan: DailyPlan, onCheckWorkoutClick: () -> Unit) {
-    val primaryColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-
-    Column(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth()
-    ) {
+fun ActivityStatusSectionEmpty() {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Text(
-            text = "My Plan",
+            text = "Activity Status",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(bottom = 12.dp)
         )
-
-        Text(
-            text = dailyPlan.day,
-            fontSize = 14.sp,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(100.dp),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                .height(90.dp),
+            shape = RoundedCornerShape(18.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
         ) {
             Box(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                // Background pattern (dots or lines for futuristic feel)
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    val canvasWidth = size.width
-                    val dotSpacing = 20.dp.toPx()
-
-                    for (x in 0..canvasWidth.toInt() step dotSpacing.toInt()) {
-                        drawCircle(
-                            color = primaryColor,
-                            radius = 2.dp.toPx(),
-                            center = Offset(x.toFloat(), size.height * 0.8f)
-                        )
-                    }
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 20.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_energy),
-                            contentDescription = null,
-                            modifier = Modifier.size(30.dp),
-                        )
-
-
-                        Spacer(modifier = Modifier.width(16.dp))
-
-                        Column {
-                            Text(
-                                text = dailyPlan.workoutType,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                            Text(
-                                text = "${dailyPlan.dayOfWeek} of week",
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                            )
-                        }
-                    }
-
-                    Button(
-                        onClick = onCheckWorkoutClick,
-                        shape = RoundedCornerShape(20.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        ),
-                        modifier = Modifier.height(40.dp),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp)
-                    ) {
-                        Text(
-                            text = "Check",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        painter = painterResource(id = com.example.fitlog.R.drawable.ic_run),
+                        contentDescription = null,
+                        tint = Color(0xFF7C5CFA).copy(alpha = 0.2f),
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = "No activity yet",
+                        color = Color(0xFFB0AFC6),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             }
         }
     }
 }
 
+@Composable
+fun LatestWorkoutsSectionEmpty() {
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Text(
+            text = "Latest Workout",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        painter = painterResource(id = com.example.fitlog.R.drawable.ic_run),
+                        contentDescription = null,
+                        tint = Color(0xFF7C5CFA).copy(alpha = 0.2f),
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = "No workouts yet",
+                        color = Color(0xFFB0AFC6),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun UserGreetingSection(
@@ -633,6 +710,63 @@ fun UserGreetingSection(
     }
 }
 
+@Composable
+fun DailyGoalProgressBar(current: Int, goal: Int, modifier: Modifier = Modifier) {
+    val progress = (current.toFloat() / goal).coerceIn(0f, 1f)
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(70.dp),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF7C5CFA).copy(alpha = 0.13f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = com.example.fitlog.R.drawable.ic_run),
+                    contentDescription = null,
+                    tint = Color(0xFF7C5CFA),
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Daily Steps Goal",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF2D2154)
+                )
+                Text(
+                    text = "$current / $goal steps",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF7C5CFA).copy(alpha = 0.7f)
+                )
+                LinearProgressIndicator(
+                    progress = progress,
+                    color = Color(0xFF7C5CFA),
+                    trackColor = Color(0xFF7C5CFA).copy(alpha = 0.15f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .padding(top = 4.dp)
+                )
+            }
+        }
+    }
+}
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
 @Composable
@@ -672,19 +806,6 @@ fun RecentWorkoutsSectionPreview() {
 }
 
 
-@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
-@Composable
-fun ActivityStatusSectionPreview() {
-    MaterialTheme {
-        val sampleActivityStats = ActivityStats(
-            calories = 620.68f,
-            steps = 1240
-        )
-        ActivityStatusSection(
-            activityStats = sampleActivityStats
-        )
-    }
-}
 
 
 @Preview(showBackground = true)
@@ -695,6 +816,6 @@ fun UserGreetingSectionPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun DailyPlanSectionPreview() {
-    DailyPlanSection(dailyPlan = DailyPlan("Monday", "Upper Body", "2"), onCheckWorkoutClick = {})
+fun MyPlanCardPreview() {
+    MyPlanCard(workoutType = "Upper Body", dayOfWeek = "Monday of week", onCheckClick = {})
 }

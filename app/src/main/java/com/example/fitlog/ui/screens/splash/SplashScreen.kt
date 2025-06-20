@@ -22,10 +22,14 @@ import androidx.navigation.NavController
 import com.example.fitlog.ui.navigation.ScreenRoute
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.example.fitlog.data.local.preferences.UserPreferences
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun SplashScreen(navController: NavController) {
     val context = LocalContext.current
+    val userPreferences = remember { UserPreferences(context) }
+    val coroutineScope = rememberCoroutineScope()
 
     // Define colors
     val greenPrimary = Color(0xFF2E7D32)
@@ -44,9 +48,6 @@ fun SplashScreen(navController: NavController) {
     val calendarAnimatable = remember { Animatable(0f) }
     val stopwatchAnimatable = remember { Animatable(0f) }
     val textAlphaAnimatable = remember { Animatable(0f) }
-
-    // Coroutine scope for parallel animations
-    val coroutineScope = rememberCoroutineScope()
 
     // Animation sequence
     LaunchedEffect(Unit) {
@@ -105,9 +106,14 @@ fun SplashScreen(navController: NavController) {
         // Wait before navigating
         delay(600)
 
-        // Navigate to the next screen
-        navController.navigate(ScreenRoute.Onboarding.route) {
-            popUpTo(0) { inclusive = true }
+        coroutineScope.launch {
+            val isFirstLaunch = userPreferences.isFirstLaunch()
+            val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
+            when {
+                isFirstLaunch -> navController.navigate(ScreenRoute.Onboarding.route) { popUpTo(0) { inclusive = true } }
+                isLoggedIn -> navController.navigate(ScreenRoute.Home.route) { popUpTo(0) { inclusive = true } }
+                else -> navController.navigate(ScreenRoute.SignIn.route) { popUpTo(0) { inclusive = true } }
+            }
         }
     }
 

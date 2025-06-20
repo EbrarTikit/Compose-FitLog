@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fitlog.R
+import com.example.fitlog.data.model.ExerciseSet
 import com.example.fitlog.ui.theme.Gray
 import com.example.fitlog.ui.theme.LightPurple1
 import com.example.fitlog.ui.theme.OptionTxtColor
@@ -43,8 +44,8 @@ fun AddExerciseScreen(
     var selectedWorkout by remember { mutableStateOf<String?>(null) }
     var sets by remember { mutableStateOf(listOf<ExerciseSet>()) }
     var tempSetType by remember { mutableStateOf("Set 1") }
-    var tempReps by remember { mutableStateOf("") }
-    var tempWeight by remember { mutableStateOf("") }
+    var tempReps by remember { mutableStateOf(0) }
+    var tempWeight by remember { mutableStateOf(0f) }
 
     Scaffold(
         floatingActionButton = {
@@ -138,7 +139,7 @@ fun AddExerciseScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("${set.type}")
+                        Text("${set.setType}")
                         Text("${set.reps} reps, ${set.weight}kg")
                     }
                 }
@@ -198,8 +199,8 @@ fun ChooseWorkoutSheet(
 fun AddSetSheet(
     sheetState: SheetState,
     setType: String,
-    reps: String,
-    weight: String,
+    reps: Int,
+    weight: Float,
     onSetTypeClick: () -> Unit,
     onRepsChange: (String) -> Unit,
     onWeightChange: (String) -> Unit,
@@ -329,7 +330,7 @@ fun SetTypeSheet(sheetState: SheetState, onSelect: (String) -> Unit) {
 }
 
 
-data class ExerciseSet(val type: String, val reps: String, val weight: String)
+
 
 @Preview(showBackground = true)
 @Composable
