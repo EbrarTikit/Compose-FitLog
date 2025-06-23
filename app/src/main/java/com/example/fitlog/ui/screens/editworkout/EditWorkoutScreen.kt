@@ -17,9 +17,9 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun EditWorkoutScreen(
-    initialName: String = "Fullbody Workout",
-    initialDuration: String = "32",
-    initialCalories: String = "320",
+    initialName: String = "",
+    initialDuration: String = "",
+    initialCalories: String = "",
     onSave: (String, String, String) -> Unit,
     onBack: () -> Unit
 ) {

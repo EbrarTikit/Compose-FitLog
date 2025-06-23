@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fitlog.R
+import com.example.fitlog.data.model.ExerciseSet
 import com.example.fitlog.ui.theme.Gray
 import com.example.fitlog.ui.theme.LightPurple1
 import com.example.fitlog.ui.theme.OptionTxtColor
@@ -43,8 +44,10 @@ fun AddExerciseScreen(
     var selectedWorkout by remember { mutableStateOf<String?>(null) }
     var sets by remember { mutableStateOf(listOf<ExerciseSet>()) }
     var tempSetType by remember { mutableStateOf("Set 1") }
-    var tempReps by remember { mutableStateOf("") }
-    var tempWeight by remember { mutableStateOf("") }
+    var tempReps by remember { mutableStateOf(0) }
+    var tempWeight by remember { mutableStateOf(0f) }
+    var tempRepsInput by remember { mutableStateOf("") }
+    var tempWeightInput by remember { mutableStateOf("") }
 
     Scaffold(
         floatingActionButton = {
@@ -138,7 +141,7 @@ fun AddExerciseScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("${set.type}")
+                        Text("${set.setType}")
                         Text("${set.reps} reps, ${set.weight}kg")
                     }
                 }
@@ -150,10 +153,20 @@ fun AddExerciseScreen(
         selectedWorkout = it
     }, onAddNewWorkout = onAddNewWorkout)
 
-    AddSetSheet(addSetSheetState, tempSetType, tempReps, tempWeight, onSetTypeClick = {
+    AddSetSheet(addSetSheetState, tempSetType, tempRepsInput, tempWeightInput, onSetTypeClick = {
         scope.launch { setTypeSheetState.show() }
-    }, onRepsChange = { tempReps = it }, onWeightChange = { tempWeight = it }, onAddSet = {
-        sets = sets + ExerciseSet(tempSetType, tempReps, tempWeight)
+    }, onRepsChange = {
+        tempRepsInput = it
+        tempReps = it.toIntOrNull() ?: 0
+    }, onWeightChange = {
+        tempWeightInput = it
+        tempWeight = it.toFloatOrNull() ?: 0f
+    }, onAddSet = {
+        sets = sets + ExerciseSet(setType = tempSetType, reps = tempReps, weight = tempWeight)
+        tempRepsInput = ""
+        tempWeightInput = ""
+        tempReps = 0
+        tempWeight = 0f
     })
 
     SetTypeSheet(setTypeSheetState, onSelect = {
@@ -252,7 +265,6 @@ fun AddSetSheet(
                     )
                 )
 
-
                 Spacer(modifier = Modifier.height(8.dp))
 
                 TextField(
@@ -285,7 +297,6 @@ fun AddSetSheet(
         }
     }
 }
-
 
 @Composable
 fun SetTypeSheet(sheetState: SheetState, onSelect: (String) -> Unit) {
@@ -328,14 +339,11 @@ fun SetTypeSheet(sheetState: SheetState, onSelect: (String) -> Unit) {
     }
 }
 
-
-data class ExerciseSet(val type: String, val reps: String, val weight: String)
-
 @Preview(showBackground = true)
 @Composable
 fun AddExerciseScreenPreview() {
     AddExerciseScreen(
-        workouts = listOf("Chest Press", "Squat"),
+        workouts = emptyList(),
         onAddNewWorkout = {},
         onBack = {}
     )
@@ -345,7 +353,7 @@ fun AddExerciseScreenPreview() {
 @Composable
 fun ChooseWorkoutSheetPreview() {
     Column(modifier = Modifier.padding(16.dp)) {
-        listOf("Chest Press", "Squat").forEach {
+        emptyList<String>().forEach {
             Text(
                 text = it,
                 modifier = Modifier
@@ -455,8 +463,6 @@ fun AddSetSheetContentPreview() {
         }
     }
 }
-
-
 
 @Preview(showBackground = true)
 @Composable

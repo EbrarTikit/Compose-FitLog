@@ -10,18 +10,19 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 
 private val LightColors = lightColorScheme(
     primary = PrimaryPurple,
     secondary = LightPurple5,
-    background = LightPurple1,
+    background = Color.White,
     onBackground = DarkBlue2
 )
 
 private val DarkColors = darkColorScheme(
     primary = DarkPurple1,
     secondary = DarkPurple2,
-    background = DarkBlue1,
+    background = Color.White,
     onBackground = LightPurple2
 )
 
@@ -29,7 +30,7 @@ private val DarkColors = darkColorScheme(
 fun FitLogTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

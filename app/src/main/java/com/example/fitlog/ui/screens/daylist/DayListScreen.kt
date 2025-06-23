@@ -193,19 +193,7 @@ fun DayListScreen(
 fun DayListScreenPreview() {
     DayListScreen(
         initialDate = LocalDate.of(2025, 6, 17),
-        workoutsForDate = { date ->
-            if (date == LocalDate.of(2025, 6, 17)) {
-                listOf(
-                    "Push-ups" to "3 sets",
-                    "Pull-ups" to "4 sets",
-                    "Squats" to "5 sets"
-                )
-            } else {
-                emptyList()
-            }
-        },
-        onSeeAllClick = { date ->
-            println("See all clicked for $date")
-        }
+        workoutsForDate = { _ -> emptyList() },
+        onSeeAllClick = { _ -> }
     )
 }

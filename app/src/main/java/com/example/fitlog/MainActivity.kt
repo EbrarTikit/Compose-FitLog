@@ -1,7 +1,7 @@
 package com.example.fitlog
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -11,7 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.fitlog.ui.navigation.FitLogNavGraph
 import com.example.fitlog.ui.theme.FitLogTheme
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

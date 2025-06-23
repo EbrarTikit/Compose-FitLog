@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.fitlog.data.local.preferences.UserPreferences
 import com.example.fitlog.ui.screens.addexercise.AddExerciseScreen
 import com.example.fitlog.ui.screens.daylist.DayListScreen
@@ -23,7 +24,14 @@ import com.example.fitlog.ui.screens.signin.SignInScreen
 import com.example.fitlog.ui.screens.signup.SignUpScreen
 import com.example.fitlog.ui.screens.splash.SplashScreen
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.Timestamp
+import java.util.UUID
+import com.example.fitlog.data.repository.WorkoutRepository
+import com.example.fitlog.data.model.Workout
 import kotlinx.coroutines.launch
+import androidx.navigation.NavType
+import java.time.ZoneId
+import java.time.LocalDate
 
 @Composable
 fun FitLogNavGraph(
@@ -81,51 +89,54 @@ fun FitLogNavGraph(
             }
 
             composable(ScreenRoute.Home.route) {
+                val viewModel: com.example.fitlog.ui.screens.home.HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
                 HomeScreen(
-                    navController = navController
+                    navController = navController,
+                    viewModel = viewModel
                 )
             }
 
             composable(ScreenRoute.EditWorkout.route) {
+                val viewModel: com.example.fitlog.ui.screens.home.HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+                val selectedDate = viewModel.selectedDate.value
                 EditWorkoutScreen(
                     onSave = { name, duration, calories ->
-                        println("Saved: $name, $duration, $calories")
-                        navController.popBackStack()
+                        val user = FirebaseAuth.getInstance().currentUser
+                        if (user != null) {
+                            val userId = user.uid
+                            val workoutId = UUID.randomUUID().toString()
+                            val startOfDay = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                            val timestamp = Timestamp(startOfDay / 1000, ((startOfDay % 1000) * 1000000).toInt())
+                            val workout = Workout(
+                                id = workoutId,
+                                userId = userId,
+                                name = name,
+                                duration = duration.toIntOrNull() ?: 0,
+                                calories = calories.toIntOrNull() ?: 0,
+                                date = timestamp,
+                                createdAt = Timestamp.now(),
+                                updatedAt = Timestamp.now()
+                            )
+                            WorkoutRepository().addWorkout(userId, workout) { success ->
+                                if (success) {
+                                    navController.navigate("detail/$workoutId") {
+                                        popUpTo(ScreenRoute.Home.route)
+                                    }
+                                }
+                            }
+                        }
                     },
                     onBack = { navController.popBackStack() }
                 )
             }
 
-            composable(ScreenRoute.DayList.route) {
-                DayListScreen(
-                    workoutsForDate = { date ->
-                        // dummy data
-                        listOf(
-                            "Push-ups" to "3 sets",
-                            "Pull-ups" to "4 sets",
-                            "Squats" to "5 sets"
-                        )
-                    },
-                    onSeeAllClick = { date ->
-                        println("See all clicked for $date")
-                        navController.navigate(ScreenRoute.Detail.route)
-                    }
-                )
-            }
-
-            composable(ScreenRoute.Detail.route) {
+            composable(
+                route = "detail/{workoutId}",
+                arguments = listOf(navArgument("workoutId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val workoutId = backStackEntry.arguments?.getString("workoutId") ?: ""
                 DetailScreen(
-                    workoutsForDate = { date ->
-                        // Dummy data
-                        if (date.dayOfMonth % 2 == 0) {
-                            listOf(
-                                "Push-ups" to "3 sets",
-                                "Squats" to "4 sets"
-                            )
-                        } else {
-                            emptyList()
-                        }
-                    },
+                    workoutId = workoutId,
                     onEditWorkoutClick = {
                         navController.navigate(ScreenRoute.EditWorkout.route)
                     },
@@ -138,10 +149,23 @@ fun FitLogNavGraph(
                 )
             }
 
+            composable(ScreenRoute.DayList.route) {
+                DayListScreen(
+                    workoutsForDate = { date ->
+                        // TODO: Replace with real data source
+                        emptyList()
+                    },
+                    onSeeAllClick = { date ->
+                        // TODO: Implement navigation or action
+                        navController.navigate(ScreenRoute.Detail.route)
+                    }
+                )
+            }
+
             composable(ScreenRoute.AddExercise.route) {
                 AddExerciseScreen(
-                    //dummy data
-                    workouts = listOf("Chest Press", "Squat"),
+                    // TODO: Replace with real data source
+                    workouts = emptyList(),
                     onAddNewWorkout = {
                         navController.navigate(ScreenRoute.EditWorkout.route)
                     },

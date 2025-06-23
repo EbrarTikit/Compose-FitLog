@@ -17,10 +17,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.fitlog.data.model.Onboarding
+import com.example.fitlog.data.local.preferences.UserPreferences
 import com.example.fitlog.ui.components.ButtonUI
 import com.example.fitlog.ui.components.PageIndicator
 import com.example.fitlog.ui.navigation.ScreenRoute
@@ -46,6 +48,8 @@ fun OnboardingScreen(navController: NavController, onFinish: () -> Unit) {
     }
 
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val userPreferences = remember { UserPreferences(context) }
 
     Scaffold(
         bottomBar = {
@@ -95,6 +99,7 @@ fun OnboardingScreen(navController: NavController, onFinish: () -> Unit) {
                             if (pagerState.currentPage < pages.size - 1) {
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)
                             } else {
+                                userPreferences.setFirstLaunchCompleted()
                                 onFinish()
                             }
                         }
