@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -104,7 +105,8 @@ fun HomeScreen(
         activityStats = activityStats,
         recentWorkouts = recentWorkouts,
         onCheckWorkoutClick = {navController.navigate(ScreenRoute.DayList.route)},
-        onCalendarClick = {showDatePicker = true}
+        onCalendarClick = {showDatePicker = true},
+        onCreatePlanClick = { navController.navigate(ScreenRoute.EditWorkout.route) }
     )
 
     if (showDatePicker) {
@@ -138,7 +140,8 @@ private fun HomeContent(
     activityStats: ActivityStats,
     recentWorkouts: List<WorkoutSummary>,
     onCheckWorkoutClick: () -> Unit,
-    onCalendarClick: () -> Unit
+    onCalendarClick: () -> Unit,
+    onCreatePlanClick: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -159,7 +162,7 @@ private fun HomeContent(
                 modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
             )
             if (dailyPlan.workoutType.isBlank() && dailyPlan.dayOfWeek.isBlank()) {
-                MyPlanCardEmpty()
+                MyPlanCardEmpty(onCreatePlanClick = onCreatePlanClick)
             } else {
                 MyPlanCard(
                     workoutType = dailyPlan.workoutType,
@@ -486,12 +489,13 @@ fun MyPlanCard(
 }
 
 @Composable
-fun MyPlanCardEmpty() {
+fun MyPlanCardEmpty(onCreatePlanClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(72.dp)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .clickable { onCreatePlanClick() },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
