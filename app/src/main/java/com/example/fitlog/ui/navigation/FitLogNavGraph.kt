@@ -99,15 +99,11 @@ fun FitLogNavGraph(
             composable(ScreenRoute.DayList.route) {
                 DayListScreen(
                     workoutsForDate = { date ->
-                        // dummy data
-                        listOf(
-                            "Push-ups" to "3 sets",
-                            "Pull-ups" to "4 sets",
-                            "Squats" to "5 sets"
-                        )
+                        // TODO: Replace with real data source
+                        emptyList()
                     },
                     onSeeAllClick = { date ->
-                        println("See all clicked for $date")
+                        // TODO: Implement navigation or action
                         navController.navigate(ScreenRoute.Detail.route)
                     }
                 )
@@ -116,15 +112,8 @@ fun FitLogNavGraph(
             composable(ScreenRoute.Detail.route) {
                 DetailScreen(
                     workoutsForDate = { date ->
-                        // Dummy data
-                        if (date.dayOfMonth % 2 == 0) {
-                            listOf(
-                                "Push-ups" to "3 sets",
-                                "Squats" to "4 sets"
-                            )
-                        } else {
-                            emptyList()
-                        }
+                        // TODO: Replace with real data source
+                        emptyList()
                     },
                     onEditWorkoutClick = {
                         navController.navigate(ScreenRoute.EditWorkout.route)
@@ -140,8 +129,8 @@ fun FitLogNavGraph(
 
             composable(ScreenRoute.AddExercise.route) {
                 AddExerciseScreen(
-                    //dummy data
-                    workouts = listOf("Chest Press", "Squat"),
+                    // TODO: Replace with real data source
+                    workouts = emptyList(),
                     onAddNewWorkout = {
                         navController.navigate(ScreenRoute.EditWorkout.route)
                     },

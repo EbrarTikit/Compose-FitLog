@@ -343,7 +343,7 @@ fun SetTypeSheet(sheetState: SheetState, onSelect: (String) -> Unit) {
 @Composable
 fun AddExerciseScreenPreview() {
     AddExerciseScreen(
-        workouts = listOf("Chest Press", "Squat"),
+        workouts = emptyList(),
         onAddNewWorkout = {},
         onBack = {}
     )
@@ -353,7 +353,7 @@ fun AddExerciseScreenPreview() {
 @Composable
 fun ChooseWorkoutSheetPreview() {
     Column(modifier = Modifier.padding(16.dp)) {
-        listOf("Chest Press", "Squat").forEach {
+        emptyList<String>().forEach {
             Text(
                 text = it,
                 modifier = Modifier

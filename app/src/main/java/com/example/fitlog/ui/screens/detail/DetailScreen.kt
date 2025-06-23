@@ -139,12 +139,7 @@ fun DetailScreen(
 fun DetailScreenPreview() {
     DetailScreen(
         LocalDate.now(),
-        workoutsForDate = { date ->
-            listOf(
-                "Workout 1" to "3 sets",
-                "Workout 2" to "4 sets"
-            )
-        },
+        workoutsForDate = { _ -> emptyList() },
         onEditWorkoutClick = {},
         onAddWorkoutClick = {},
         onAddExerciseClick = {}
