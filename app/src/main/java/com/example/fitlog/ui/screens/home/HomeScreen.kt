@@ -2,7 +2,6 @@ package com.example.fitlog.ui.screens.home
 
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,9 +14,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -28,14 +31,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,8 +49,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -54,24 +57,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fitlog.R
 import com.example.fitlog.data.model.ActivityStats
 import com.example.fitlog.data.model.DailyPlan
 import com.example.fitlog.data.model.WorkoutSummary
+import com.example.fitlog.ui.navigation.ScreenRoute
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import androidx.lifecycle.viewmodel.compose.viewModel
+
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.fitlog.ui.navigation.ScreenRoute
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 
 data class ActivityStatusItem(
     val title: String,
@@ -84,7 +86,8 @@ data class ActivityStatusItem(
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: HomeViewModel = viewModel()) {
+    viewModel: HomeViewModel = viewModel()
+) {
     val context = LocalContext.current
 
     val userName = "Linh!"
@@ -93,10 +96,17 @@ fun HomeScreen(
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
 
-    val dailyPlan by remember { viewModel.dailyPlan }
-    val activityStats by remember { viewModel.activityStats }
-    val recentWorkouts by remember { viewModel.recentWorkouts }
+    val dailyPlan by viewModel.dailyPlan
+    val activityStats by viewModel.activityStats
+    val recentWorkouts by viewModel.recentWorkouts
 
+    // Initialize data when screen loads or date changes
+    LaunchedEffect(viewModel.selectedDate.value) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            viewModel.initializeData()
+        }
+    }
 
     HomeContent(
         userName = "Ebrar!",
@@ -104,8 +114,8 @@ fun HomeScreen(
         dailyPlan = dailyPlan,
         activityStats = activityStats,
         recentWorkouts = recentWorkouts,
-        onCheckWorkoutClick = {navController.navigate(ScreenRoute.DayList.route)},
-        onCalendarClick = {showDatePicker = true},
+        onCheckWorkoutClick = { navController.navigate(ScreenRoute.DayList.route) },
+        onCalendarClick = { showDatePicker = true },
         onCreatePlanClick = { navController.navigate(ScreenRoute.EditWorkout.route) }
     )
 
@@ -174,17 +184,65 @@ private fun HomeContent(
             // Always show grid, use 0 values if no data
             val activityItems = if (activityStats.calories == 0f && activityStats.steps == 0) {
                 listOf(
-                    ActivityStatusItem("Calories", "0", "Kcal", com.example.fitlog.R.drawable.ic_fire, Color(0xFFFF5722)),
-                    ActivityStatusItem("Steps", "0", "Steps", com.example.fitlog.R.drawable.ic_run, Color(0xFF1976D2)),
-                    ActivityStatusItem("Distance", "0", "km", com.example.fitlog.R.drawable.ic_run, Color(0xFF43A047)),
-                    ActivityStatusItem("Active", "0", "min", com.example.fitlog.R.drawable.ic_fire, Color(0xFF7C5CFA))
+                    ActivityStatusItem(
+                        "Calories",
+                        "0",
+                        "Kcal",
+                        com.example.fitlog.R.drawable.ic_fire,
+                        Color(0xFFFF5722)
+                    ),
+                    ActivityStatusItem(
+                        "Steps",
+                        "0",
+                        "Steps",
+                        com.example.fitlog.R.drawable.ic_run,
+                        Color(0xFF1976D2)
+                    ),
+                    ActivityStatusItem(
+                        "Distance",
+                        "0",
+                        "km",
+                        com.example.fitlog.R.drawable.ic_run,
+                        Color(0xFF43A047)
+                    ),
+                    ActivityStatusItem(
+                        "Active",
+                        "0",
+                        "min",
+                        com.example.fitlog.R.drawable.ic_fire,
+                        Color(0xFF7C5CFA)
+                    )
                 )
             } else {
                 listOf(
-                    ActivityStatusItem("Calories", activityStats.calories.toString(), "Kcal", com.example.fitlog.R.drawable.ic_fire, Color(0xFFFF5722)),
-                    ActivityStatusItem("Steps", activityStats.steps.toString(), "Steps", com.example.fitlog.R.drawable.ic_run, Color(0xFF1976D2)),
-                    ActivityStatusItem("Distance", "2.3", "km", com.example.fitlog.R.drawable.ic_run, Color(0xFF43A047)),
-                    ActivityStatusItem("Active", "45", "min", com.example.fitlog.R.drawable.ic_fire, Color(0xFF7C5CFA))
+                    ActivityStatusItem(
+                        "Calories",
+                        activityStats.calories.toString(),
+                        "Kcal",
+                        com.example.fitlog.R.drawable.ic_fire,
+                        Color(0xFFFF5722)
+                    ),
+                    ActivityStatusItem(
+                        "Steps",
+                        activityStats.steps.toString(),
+                        "Steps",
+                        com.example.fitlog.R.drawable.ic_run,
+                        Color(0xFF1976D2)
+                    ),
+                    ActivityStatusItem(
+                        "Distance",
+                        "2.3",
+                        "km",
+                        com.example.fitlog.R.drawable.ic_run,
+                        Color(0xFF43A047)
+                    ),
+                    ActivityStatusItem(
+                        "Active",
+                        "45",
+                        "min",
+                        com.example.fitlog.R.drawable.ic_fire,
+                        Color(0xFF7C5CFA)
+                    )
                 )
             }
             ActivityStatusSectionModern(items = activityItems)
@@ -197,7 +255,6 @@ private fun HomeContent(
         }
     }
 }
-
 
 @Composable
 fun RecentWorkoutsSection(recentWorkouts: List<WorkoutSummary>) {
@@ -339,7 +396,6 @@ fun WorkoutItemCard(workout: WorkoutSummary) {
     }
 }
 
-
 @Composable
 fun ActivityStatusSectionModern(items: List<ActivityStatusItem>) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -417,7 +473,6 @@ fun ActivityStatusCardModern(item: ActivityStatusItem, modifier: Modifier = Modi
         }
     }
 }
-
 
 @Composable
 fun MyPlanCard(
@@ -660,8 +715,7 @@ fun UserGreetingSection(
                 Image(
                     painter = painterResource(id = R.drawable.user),
                     contentDescription = null,
-                    modifier = Modifier
-                        .size(50.dp),
+                    modifier = Modifier.size(50.dp),
                     alignment = Alignment.Center
                 )
             }
@@ -809,13 +863,14 @@ fun RecentWorkoutsSectionPreview() {
     }
 }
 
-
-
-
 @Preview(showBackground = true)
 @Composable
 fun UserGreetingSectionPreview() {
-    UserGreetingSection(userName = "John Doe", currentDate = "Thursday, 08 July", onCalendarClick = {})
+    UserGreetingSection(
+        userName = "John Doe",
+        currentDate = "Thursday, 08 July",
+        onCalendarClick = {}
+    )
 }
 
 @Preview(showBackground = true)

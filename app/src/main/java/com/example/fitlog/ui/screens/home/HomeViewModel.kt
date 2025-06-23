@@ -16,6 +16,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.time.LocalDate
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.Timestamp
+import java.time.ZoneId
+import android.util.Log
 
 class HomeViewModel(
     private val workoutRepository: WorkoutRepository = WorkoutRepository(),
@@ -50,10 +54,48 @@ class HomeViewModel(
 
     fun loadHomeDataForDate(date: LocalDate) {
         viewModelScope.launch {
-            // Remove dummy data, set empty/zero states or fetch from repository if implemented
-            dailyPlan.value = DailyPlan("", "", "")
+            val user = FirebaseAuth.getInstance().currentUser
+            if (user != null) {
+                val userId = user.uid
+                val zoneId = ZoneId.systemDefault()
+                val startOfDay = date.atStartOfDay(zoneId).toInstant().toEpochMilli()
+                val endOfDay = date.plusDays(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
+                val startTimestamp = Timestamp(startOfDay / 1000, ((startOfDay % 1000) * 1000000).toInt())
+                val endTimestamp = Timestamp(endOfDay / 1000, ((endOfDay % 1000) * 1000000).toInt())
+                Log.d("FitLog", "userId=$userId, start=$startTimestamp, end=$endTimestamp, date=$date")
+
+                // Load workout for specific date
+                workoutRepository.getWorkoutByDateRange(userId, startTimestamp, endTimestamp) { workout ->
+                    Log.d("FitLog", "workout result: $workout")
+                    if (workout != null) {
+                        dailyPlan.value = DailyPlan(
+                            day = date.dayOfMonth.toString(),
+                            workoutType = workout.name,
+                            dayOfWeek = date.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
+                        )
+                    } else {
+                        dailyPlan.value = DailyPlan("", "", "")
+                        // Load recent workouts if no workout is found for the specific date
+                        workoutRepository.getWorkouts(userId) { workoutList ->
+                            val recentWorkoutSummaries = workoutList.take(3).map { workout ->
+                                WorkoutSummary(
+                                    id = workout.id,
+                                    name = workout.name,
+                                    calories = workout.calories,
+                                    duration = workout.duration,
+                                    image = com.example.fitlog.R.drawable.ic_run,
+                                    progress = 0.7f // Default progress
+                                )
+                            }
+                            recentWorkouts.value = recentWorkoutSummaries
+                        }
+                    }
+                }
+            } else {
+                dailyPlan.value = DailyPlan("", "", "")
+                recentWorkouts.value = emptyList()
+            }
             activityStats.value = ActivityStats(0f, 0)
-            recentWorkouts.value = emptyList()
         }
     }
 
@@ -81,6 +123,10 @@ class HomeViewModel(
     }
 
     init {
-        // Removed: loadHomeDataForDate(selectedDate.value)
+        loadHomeDataForDate(selectedDate.value)
+    }
+
+    fun initializeData() {
+        loadHomeDataForDate(selectedDate.value)
     }
 }

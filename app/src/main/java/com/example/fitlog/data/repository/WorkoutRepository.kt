@@ -70,4 +70,17 @@ class WorkoutRepository(private val db: FirebaseFirestore = FirebaseFirestore.ge
             .addOnSuccessListener { onResult(true) }
             .addOnFailureListener { onResult(false) }
     }
+
+    fun getWorkoutByDateRange(userId: String, start: Timestamp, end: Timestamp, onResult: (Workout?) -> Unit) {
+        db.collection("users").document(userId)
+            .collection("workouts")
+            .whereGreaterThanOrEqualTo("date", start)
+            .whereLessThan("date", end)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val workout = snapshot.documents.firstOrNull()?.toObject(Workout::class.java)
+                onResult(workout)
+            }
+            .addOnFailureListener { onResult(null) }
+    }
 } 

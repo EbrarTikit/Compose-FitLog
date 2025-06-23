@@ -30,6 +30,8 @@ import com.example.fitlog.data.repository.WorkoutRepository
 import com.example.fitlog.data.model.Workout
 import kotlinx.coroutines.launch
 import androidx.navigation.NavType
+import java.time.ZoneId
+import java.time.LocalDate
 
 @Composable
 fun FitLogNavGraph(
@@ -87,25 +89,31 @@ fun FitLogNavGraph(
             }
 
             composable(ScreenRoute.Home.route) {
+                val viewModel: com.example.fitlog.ui.screens.home.HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
                 HomeScreen(
-                    navController = navController
+                    navController = navController,
+                    viewModel = viewModel
                 )
             }
 
             composable(ScreenRoute.EditWorkout.route) {
+                val viewModel: com.example.fitlog.ui.screens.home.HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+                val selectedDate = viewModel.selectedDate.value
                 EditWorkoutScreen(
                     onSave = { name, duration, calories ->
                         val user = FirebaseAuth.getInstance().currentUser
                         if (user != null) {
                             val userId = user.uid
                             val workoutId = UUID.randomUUID().toString()
+                            val startOfDay = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                            val timestamp = Timestamp(startOfDay / 1000, ((startOfDay % 1000) * 1000000).toInt())
                             val workout = Workout(
                                 id = workoutId,
                                 userId = userId,
                                 name = name,
                                 duration = duration.toIntOrNull() ?: 0,
                                 calories = calories.toIntOrNull() ?: 0,
-                                date = Timestamp.now(),
+                                date = timestamp,
                                 createdAt = Timestamp.now(),
                                 updatedAt = Timestamp.now()
                             )
