@@ -264,6 +264,10 @@ fun AddExerciseScreen(
 
     SetTypeSheet(setTypeSheetState, onSelect = {
         tempSetType = it
+        scope.launch {
+            setTypeSheetState.hide()
+            addSetSheetState.show()
+        }
     })
 }
 
