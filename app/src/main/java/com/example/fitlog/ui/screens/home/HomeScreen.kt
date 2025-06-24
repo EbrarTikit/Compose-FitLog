@@ -31,8 +31,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,6 +59,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.fitlog.R
 import com.example.fitlog.data.model.ActivityStats
 import com.example.fitlog.data.model.DailyPlan
@@ -70,10 +73,6 @@ import com.google.firebase.ktx.Firebase
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-
-import androidx.compose.runtime.setValue
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 
 data class ActivityStatusItem(
     val title: String,
@@ -114,7 +113,16 @@ fun HomeScreen(
         dailyPlan = dailyPlan,
         activityStats = activityStats,
         recentWorkouts = recentWorkouts,
-        onCheckWorkoutClick = { navController.navigate(ScreenRoute.DayList.route) },
+        onCheckWorkoutClick = {
+            // Navigate to DetailScreen with the current workout
+            val workoutId = viewModel.getCurrentWorkoutId()
+            if (workoutId.isNotEmpty()) {
+                navController.navigate("detail/$workoutId")
+            } else {
+                // If no workout ID, navigate to a generic detail screen
+                navController.navigate("detail/current")
+            }
+        },
         onCalendarClick = { showDatePicker = true },
         onCreatePlanClick = { navController.navigate(ScreenRoute.EditWorkout.route) },
         onWorkoutClick = { workoutId -> navController.navigate("detail/$workoutId") }

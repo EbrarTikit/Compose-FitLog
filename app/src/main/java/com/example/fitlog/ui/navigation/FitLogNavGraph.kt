@@ -24,7 +24,6 @@ import com.example.fitlog.ui.screens.signin.SignInScreen
 import com.example.fitlog.ui.screens.signup.SignUpScreen
 import com.example.fitlog.ui.screens.splash.SplashScreen
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.Timestamp
 import java.util.UUID
 import com.example.fitlog.data.repository.WorkoutRepository
 import com.example.fitlog.data.model.Workout
@@ -32,6 +31,7 @@ import kotlinx.coroutines.launch
 import androidx.navigation.NavType
 import java.time.ZoneId
 import java.time.LocalDate
+import com.google.firebase.Timestamp
 
 @Composable
 fun FitLogNavGraph(
@@ -154,6 +154,10 @@ fun FitLogNavGraph(
                         navController.navigate(ScreenRoute.Home.route) {
                             popUpTo(ScreenRoute.Home.route) { inclusive = false }
                         }
+                    },
+                    onExerciseSelected = { exerciseTemplate ->
+                        // Navigate to AddExercise screen with the selected template
+                        navController.navigate("${ScreenRoute.AddExercise.route}?exerciseId=${exerciseTemplate.id}")
                     }
                 )
             }

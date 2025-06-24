@@ -47,10 +47,14 @@ class HomeViewModel(
     private val _exercises = MutableStateFlow<List<Exercise>>(emptyList())
     val exercises: StateFlow<List<Exercise>> = _exercises.asStateFlow()
 
+    private var currentWorkoutId: String = ""
+
     fun onDateSelected(date: LocalDate) {
         selectedDate.value = date
         loadHomeDataForDate(date)
     }
+
+    fun getCurrentWorkoutId(): String = currentWorkoutId
 
     fun loadHomeDataForDate(date: LocalDate) {
         viewModelScope.launch {
@@ -68,12 +72,14 @@ class HomeViewModel(
                 workoutRepository.getWorkoutByDateRange(userId, startTimestamp, endTimestamp) { workout ->
                     Log.d("FitLog", "workout result: $workout")
                     if (workout != null) {
+                        currentWorkoutId = workout.id
                         dailyPlan.value = DailyPlan(
                             day = date.dayOfMonth.toString(),
                             workoutType = workout.name,
                             dayOfWeek = date.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
                         )
                     } else {
+                        currentWorkoutId = ""
                         dailyPlan.value = DailyPlan("", "", "")
                     }
                 }
@@ -93,6 +99,7 @@ class HomeViewModel(
                     recentWorkouts.value = recentWorkoutSummaries
                 }
             } else {
+                currentWorkoutId = ""
                 dailyPlan.value = DailyPlan("", "", "")
                 recentWorkouts.value = emptyList()
             }
