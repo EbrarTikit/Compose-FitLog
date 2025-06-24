@@ -332,51 +332,61 @@ fun ExerciseSelectionBottomSheet(
                         CircularProgressIndicator()
                     }
                 } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(400.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(viewModel.exerciseTemplates) { exercise ->
-                            ExerciseTemplateCard(
-                                exercise = exercise,
-                                onClick = { onExerciseSelected(exercise) }
-                            )
+                    if (viewModel.exerciseTemplates.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("No exercises found.")
                         }
-
-                        // Add New Exercise Button
-                        item {
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { onAddNewExercise() },
-                                shape = RoundedCornerShape(12.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F0)),
-                                border = androidx.compose.foundation.BorderStroke(
-                                    1.dp,
-                                    PrimaryPurple.copy(alpha = 0.3f)
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(400.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(viewModel.exerciseTemplates) { exercise ->
+                                ExerciseTemplateCard(
+                                    exercise = exercise,
+                                    onClick = { onExerciseSelected(exercise) }
                                 )
-                            ) {
-                                Row(
+                            }
+                            // Add New Exercise Button
+                            item {
+                                Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
+                                        .clickable { onAddNewExercise() },
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F0)),
+                                    border = androidx.compose.foundation.BorderStroke(
+                                        1.dp,
+                                        PrimaryPurple.copy(alpha = 0.3f)
+                                    )
                                 ) {
-                                    Icon(
-                                        Icons.Default.Add,
-                                        contentDescription = "Add New",
-                                        tint = PrimaryPurple,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = "Add New Exercise",
-                                        color = PrimaryPurple,
-                                        fontWeight = FontWeight.Medium
-                                    )
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Add,
+                                            contentDescription = "Add New",
+                                            tint = PrimaryPurple,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "Add New Exercise",
+                                            color = PrimaryPurple,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    }
                                 }
                             }
                         }
