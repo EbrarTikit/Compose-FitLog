@@ -116,7 +116,8 @@ fun HomeScreen(
         recentWorkouts = recentWorkouts,
         onCheckWorkoutClick = { navController.navigate(ScreenRoute.DayList.route) },
         onCalendarClick = { showDatePicker = true },
-        onCreatePlanClick = { navController.navigate(ScreenRoute.EditWorkout.route) }
+        onCreatePlanClick = { navController.navigate(ScreenRoute.EditWorkout.route) },
+        onWorkoutClick = { workoutId -> navController.navigate("detail/$workoutId") }
     )
 
     if (showDatePicker) {
@@ -151,7 +152,8 @@ private fun HomeContent(
     recentWorkouts: List<WorkoutSummary>,
     onCheckWorkoutClick: () -> Unit,
     onCalendarClick: () -> Unit,
-    onCreatePlanClick: () -> Unit
+    onCreatePlanClick: () -> Unit,
+    onWorkoutClick: (String) -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -250,14 +252,20 @@ private fun HomeContent(
             if (recentWorkouts.isEmpty()) {
                 LatestWorkoutsSectionEmpty()
             } else {
-                RecentWorkoutsSection(recentWorkouts)
+                RecentWorkoutsSection(
+                    recentWorkouts = recentWorkouts,
+                    onWorkoutClick = onWorkoutClick
+                )
             }
         }
     }
 }
 
 @Composable
-fun RecentWorkoutsSection(recentWorkouts: List<WorkoutSummary>) {
+fun RecentWorkoutsSection(
+    recentWorkouts: List<WorkoutSummary>,
+    onWorkoutClick: (String) -> Unit
+) {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         Text(
             text = "Latest Workout",
@@ -268,21 +276,22 @@ fun RecentWorkoutsSection(recentWorkouts: List<WorkoutSummary>) {
         )
 
         recentWorkouts.forEach { workout ->
-            WorkoutItemCard(workout)
+            WorkoutItemCard(workout, onWorkoutClick)
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-fun WorkoutItemCard(workout: WorkoutSummary) {
+fun WorkoutItemCard(workout: WorkoutSummary, onWorkoutClick: (String) -> Unit) {
     val density = LocalDensity.current
     val tertiaryColor = MaterialTheme.colorScheme.tertiary
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(90.dp),
+            .height(90.dp)
+            .clickable { onWorkoutClick(workout.id) },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
@@ -859,7 +868,7 @@ fun RecentWorkoutsSectionPreview() {
             )
         )
 
-        RecentWorkoutsSection(recentWorkouts = recentWorkouts)
+        RecentWorkoutsSection(recentWorkouts = recentWorkouts, onWorkoutClick = {})
     }
 }
 

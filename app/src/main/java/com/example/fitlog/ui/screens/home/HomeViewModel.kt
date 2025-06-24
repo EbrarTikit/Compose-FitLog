@@ -75,21 +75,22 @@ class HomeViewModel(
                         )
                     } else {
                         dailyPlan.value = DailyPlan("", "", "")
-                        // Load recent workouts if no workout is found for the specific date
-                        workoutRepository.getWorkouts(userId) { workoutList ->
-                            val recentWorkoutSummaries = workoutList.take(3).map { workout ->
-                                WorkoutSummary(
-                                    id = workout.id,
-                                    name = workout.name,
-                                    calories = workout.calories,
-                                    duration = workout.duration,
-                                    image = com.example.fitlog.R.drawable.ic_run,
-                                    progress = 0.7f // Default progress
-                                )
-                            }
-                            recentWorkouts.value = recentWorkoutSummaries
-                        }
                     }
+                }
+
+                // Always load recent workouts
+                workoutRepository.getWorkouts(userId) { workoutList ->
+                    val recentWorkoutSummaries = workoutList.take(3).map { workout ->
+                        WorkoutSummary(
+                            id = workout.id,
+                            name = workout.name,
+                            calories = workout.calories,
+                            duration = workout.duration,
+                            image = com.example.fitlog.R.drawable.ic_run,
+                            progress = 0.7f // Default progress
+                        )
+                    }
+                    recentWorkouts.value = recentWorkoutSummaries
                 }
             } else {
                 dailyPlan.value = DailyPlan("", "", "")

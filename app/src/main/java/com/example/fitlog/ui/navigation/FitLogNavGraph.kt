@@ -120,13 +120,17 @@ fun FitLogNavGraph(
                             WorkoutRepository().addWorkout(userId, workout) { success ->
                                 if (success) {
                                     navController.navigate("detail/$workoutId") {
-                                        popUpTo(ScreenRoute.Home.route)
+                                        popUpTo(ScreenRoute.EditWorkout.route) { inclusive = true }
                                     }
                                 }
                             }
                         }
                     },
-                    onBack = { navController.popBackStack() }
+                    onBack = {
+                        navController.navigate(ScreenRoute.Home.route) {
+                            popUpTo(ScreenRoute.Home.route) { inclusive = false }
+                        }
+                    }
                 )
             }
 
@@ -145,6 +149,11 @@ fun FitLogNavGraph(
                     },
                     onAddExerciseClick = {
                         navController.navigate(ScreenRoute.AddExercise.route)
+                    },
+                    onBackToHome = {
+                        navController.navigate(ScreenRoute.Home.route) {
+                            popUpTo(ScreenRoute.Home.route) { inclusive = false }
+                        }
                     }
                 )
             }
