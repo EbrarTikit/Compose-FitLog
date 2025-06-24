@@ -2,28 +2,66 @@
 
 package com.example.fitlog.ui.screens.addexercise
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,10 +73,13 @@ import com.example.fitlog.data.model.ExerciseTemplate
 import com.example.fitlog.data.repository.ExerciseRepository
 import com.example.fitlog.ui.theme.Gray
 import com.example.fitlog.ui.theme.LightPurple1
-import com.example.fitlog.ui.theme.PrimaryPurple
 import com.example.fitlog.ui.theme.OptionTxtColor
 import com.example.fitlog.ui.theme.OptionTxtColor2
+import com.example.fitlog.ui.theme.PrimaryPurple
 import kotlinx.coroutines.launch
+import androidx.navigation.NavController
+import com.example.fitlog.data.model.Exercise
+import com.google.firebase.auth.FirebaseAuth
 
 class AddExerciseViewModel(
     private val exerciseRepository: ExerciseRepository = ExerciseRepository()
@@ -103,6 +144,8 @@ fun AddExerciseScreen(
     workouts: List<String>,
     onAddNewWorkout: () -> Unit,
     onBack: () -> Unit,
+    workoutId: String,
+    navController: NavController,
     viewModel: AddExerciseViewModel = viewModel()
 ) {
     val scope = rememberCoroutineScope()
@@ -119,6 +162,9 @@ fun AddExerciseScreen(
     var tempWeight by remember { mutableStateOf(0f) }
     var tempRepsInput by remember { mutableStateOf("") }
     var tempWeightInput by remember { mutableStateOf("") }
+    var isSaving by remember { mutableStateOf(false) }
+
+    val userId = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
 
     Scaffold(
         floatingActionButton = {
@@ -149,11 +195,38 @@ fun AddExerciseScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
                 Text("Exercise", fontSize = 20.sp)
-                IconButton(onClick = {}) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "More")
+                IconButton(
+                    onClick = {
+                        if (selectedExercise != null && sets.isNotEmpty() && !isSaving) {
+                            isSaving = true
+                            val exercise = Exercise(
+                                id = selectedExercise!!.id + System.currentTimeMillis(),
+                                name = selectedExercise!!.name,
+                                sets = sets
+                            )
+                            ExerciseRepository().addExercise(userId, workoutId, exercise) { success ->
+                                isSaving = false
+                                if (success) {
+                                    navController.navigate("detail/$workoutId") {
+                                        popUpTo("add_exercise") { inclusive = true }
+                                    }
+                                }
+                                // else: hata gösterilebilir
+                            }
+                        }
+                    }
+                ) {
+                    if (isSaving) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    } else {
+                        Icon(
+                            Icons.Default.Check,
+                            contentDescription = "Save Exercise"
+                        )
+                    }
                 }
             }
 
@@ -180,12 +253,18 @@ fun AddExerciseScreen(
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Choose Exercise",
+                        Text(
+                            "Choose Exercise",
                             fontSize = 16.sp,
-                            color = OptionTxtColor)
+                            color = OptionTxtColor
+                        )
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(selectedExercise?.name ?: "None", fontSize = 14.sp, color = OptionTxtColor2)
+                        Text(
+                            selectedExercise?.name ?: "None",
+                            fontSize = 14.sp,
+                            color = OptionTxtColor2
+                        )
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
                             painter = painterResource(id = R.drawable.ic_right),
@@ -246,20 +325,25 @@ fun AddExerciseScreen(
             scope.launch { setTypeSheetState.show() }
         },
         onRepsChange = {
-            tempRepsInput = it
-            tempReps = it.toIntOrNull() ?: 0
+            tempRepsInput = it.filter { c -> c.isDigit() }
+            tempReps = tempRepsInput.toIntOrNull() ?: 0
         },
         onWeightChange = {
-            tempWeightInput = it
-            tempWeight = it.toFloatOrNull() ?: 0f
+            tempWeightInput = it.filter { c -> c.isDigit() || c == '.' }
+            tempWeight = tempWeightInput.toFloatOrNull() ?: 0f
         },
         onAddSet = {
-            sets = sets + ExerciseSet(setType = tempSetType, reps = tempReps, weight = tempWeight)
-            tempRepsInput = ""
-            tempWeightInput = ""
-            tempReps = 0
-            tempWeight = 0f
-        }
+            if (tempReps > 0 && tempWeight > 0f) {
+                sets =
+                    sets + ExerciseSet(setType = tempSetType, reps = tempReps, weight = tempWeight)
+                tempRepsInput = ""
+                tempWeightInput = ""
+                tempReps = 0
+                tempWeight = 0f
+                scope.launch { addSetSheetState.hide() }
+            }
+        },
+        isAddEnabled = tempReps > 0 && tempWeight > 0f
     )
 
     SetTypeSheet(setTypeSheetState, onSelect = {
@@ -365,8 +449,12 @@ fun ExerciseSelectionBottomSheet(
                                         .fillMaxWidth()
                                         .clickable { onAddNewExercise() },
                                     shape = RoundedCornerShape(12.dp),
-                                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F0)),
-                                    border = androidx.compose.foundation.BorderStroke(
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Color(
+                                            0xFFF0F0F0
+                                        )
+                                    ),
+                                    border = BorderStroke(
                                         1.dp,
                                         PrimaryPurple.copy(alpha = 0.3f)
                                     )
@@ -519,7 +607,8 @@ fun AddSetSheet(
     onSetTypeClick: () -> Unit,
     onRepsChange: (String) -> Unit,
     onWeightChange: (String) -> Unit,
-    onAddSet: () -> Unit
+    onAddSet: () -> Unit,
+    isAddEnabled: Boolean
 ) {
     if (sheetState.isVisible) {
         ModalBottomSheet(onDismissRequest = { }, sheetState = sheetState) {
@@ -574,7 +663,8 @@ fun AddSetSheet(
                         focusedContainerColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent
-                    )
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -592,7 +682,8 @@ fun AddSetSheet(
                         focusedContainerColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent
-                    )
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -601,7 +692,8 @@ fun AddSetSheet(
                     onClick = onAddSet,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryPurple)
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryPurple),
+                    enabled = isAddEnabled
                 ) {
                     Text("ADD", color = Color.White)
                 }
@@ -657,7 +749,11 @@ fun AddExerciseScreenPreview() {
     AddExerciseScreen(
         workouts = emptyList(),
         onAddNewWorkout = {},
-        onBack = {}
+        onBack = {},
+        workoutId = "",
+        navController = NavController(
+            context = TODO()
+        )
     )
 }
 
@@ -740,7 +836,8 @@ fun AddSetSheetContentPreview() {
                 focusedContainerColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 focusedIndicatorColor = Color.Transparent
-            )
+            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -759,7 +856,8 @@ fun AddSetSheetContentPreview() {
                 focusedContainerColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 focusedIndicatorColor = Color.Transparent
-            )
+            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
         Spacer(modifier = Modifier.height(16.dp))

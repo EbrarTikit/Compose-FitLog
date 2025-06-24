@@ -41,6 +41,8 @@ import com.example.fitlog.data.repository.ExerciseRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.Timestamp
 import android.util.Log
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 class DetailViewModel(
     private val exerciseRepository: ExerciseRepository = ExerciseRepository()
@@ -108,7 +110,8 @@ fun DetailScreen(
     onAddExerciseClick: () -> Unit,
     onBackToHome: () -> Unit,
     onExerciseSelected: (ExerciseTemplate) -> Unit = {},
-    viewModel: DetailViewModel = viewModel()
+    viewModel: DetailViewModel = viewModel(),
+    navController: NavController
 ) {
     var workout by remember { mutableStateOf<Workout?>(null) }
     var exercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
@@ -387,18 +390,22 @@ fun DetailScreen(
                 .fillMaxWidth()
                     .padding(bottom = 24.dp), contentAlignment = Alignment.BottomEnd) {
             FloatingActionButton(
-                    onClick = onAddExerciseClick,
+                onClick = {
+                    if (workoutId.isNotEmpty()) {
+                        navController.navigate("add_exercise/$workoutId")
+                    }
+                },
                 shape = CircleShape,
-                    containerColor = Color(0xFF7C5CFA),
-                    modifier = Modifier.padding(end = 24.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = "Add Exercise",
-                        tint = Color.White
-                    )
-                }
+                containerColor = Color(0xFF7C5CFA),
+                modifier = Modifier.padding(end = 24.dp)
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "Add Exercise",
+                    tint = Color.White
+                )
             }
+        }
         }
     }
 }
@@ -411,6 +418,7 @@ fun DetailScreenPreview() {
         onEditWorkoutClick = {},
         onAddWorkoutClick = {},
         onAddExerciseClick = {},
-        onBackToHome = {}
+        onBackToHome = {},
+        navController = rememberNavController()
     )
 }

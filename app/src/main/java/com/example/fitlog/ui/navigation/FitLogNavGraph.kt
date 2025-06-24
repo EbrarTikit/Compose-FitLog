@@ -156,9 +156,9 @@ fun FitLogNavGraph(
                         }
                     },
                     onExerciseSelected = { exerciseTemplate ->
-                        // Navigate to AddExercise screen with the selected template
                         navController.navigate("${ScreenRoute.AddExercise.route}?exerciseId=${exerciseTemplate.id}")
-                    }
+                    },
+                    navController = navController
                 )
             }
 
@@ -175,16 +175,17 @@ fun FitLogNavGraph(
                 )
             }
 
-            composable(ScreenRoute.AddExercise.route) {
+            composable(
+                route = "add_exercise/{workoutId}",
+                arguments = listOf(navArgument("workoutId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val workoutId = backStackEntry.arguments?.getString("workoutId") ?: ""
                 AddExerciseScreen(
-                    // TODO: Replace with real data source
                     workouts = emptyList(),
-                    onAddNewWorkout = {
-                        navController.navigate(ScreenRoute.EditWorkout.route)
-                    },
-                    onBack = {
-                        navController.popBackStack()
-                    }
+                    onAddNewWorkout = { navController.navigate(ScreenRoute.EditWorkout.route) },
+                    onBack = { navController.popBackStack() },
+                    workoutId = workoutId,
+                    navController = navController
                 )
             }
 
