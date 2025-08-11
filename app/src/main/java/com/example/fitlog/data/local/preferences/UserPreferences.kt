@@ -14,14 +14,14 @@ class UserPreferences(private val context: Context) {
     private val dataStore = context.dataStore
 
     suspend fun setFirstLaunchCompleted() {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[FIRST_LAUNCH] = false
         }
     }
 
     fun isFirstLaunch(): Boolean {
         return runBlocking {
-            context.dataStore.data.map { preferences ->
+            dataStore.data.map { preferences ->
                 preferences[FIRST_LAUNCH] ?: true
             }.first()
         }
