@@ -114,17 +114,19 @@ fun HomeScreen(
         activityStats = activityStats,
         recentWorkouts = recentWorkouts,
         onCheckWorkoutClick = {
-            // Navigate to DetailScreen with the current workout
             val workoutId = viewModel.getCurrentWorkoutId()
+            val dateMillis = viewModel.selectedDate.value.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
             if (workoutId.isNotEmpty()) {
-                navController.navigate("detail/$workoutId")
+                navController.navigate("detail/$workoutId?date=$dateMillis")
             } else {
-                // If no workout ID, navigate to a generic detail screen
-                navController.navigate("detail/current")
+                navController.navigate("detail/current?date=$dateMillis")
             }
         },
         onCalendarClick = { showDatePicker = true },
-        onCreatePlanClick = { navController.navigate(ScreenRoute.EditWorkout.route) },
+        onCreatePlanClick = {
+            val dateMillis = viewModel.selectedDate.value.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            navController.navigate("${ScreenRoute.EditWorkout.route}?date=$dateMillis")
+        },
         onWorkoutClick = { workoutId -> navController.navigate("detail/$workoutId") }
     )
 

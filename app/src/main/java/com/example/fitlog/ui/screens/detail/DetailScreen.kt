@@ -42,6 +42,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.Timestamp
 import android.util.Log
 import androidx.navigation.NavController
+import androidx.compose.ui.platform.LocalContext
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.compose.rememberNavController
 
 class DetailViewModel(
@@ -111,29 +113,41 @@ fun DetailScreen(
     onBackToHome: () -> Unit,
     onExerciseSelected: (ExerciseTemplate) -> Unit = {},
     viewModel: DetailViewModel = viewModel(),
-    navController: NavController
+    navController: NavController,
+    initialDateMillis: Long? = null
 ) {
     var workout by remember { mutableStateOf<Workout?>(null) }
     var exercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
     val userId = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+    val context = LocalContext.current
+    val activity = context as? AppCompatActivity
     val today = remember { LocalDate.now() }
-    var selectedDate by remember { mutableStateOf(today) }
+    val initialFromArg: LocalDate? = remember(initialDateMillis) {
+        initialDateMillis?.let { millis ->
+            java.time.Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
+        }
+    }
+    var selectedDate by remember { mutableStateOf(initialFromArg ?: today) }
+    var currentWorkoutId by remember { mutableStateOf(workoutId) }
 
-    LaunchedEffect(workoutId, selectedDate) {
+    LaunchedEffect(currentWorkoutId, selectedDate) {
         if (userId.isNotEmpty()) {
             Log.d(
                 "DetailScreen",
                 "Loading data for workoutId: $workoutId, userId: $userId, selectedDate: $selectedDate"
             )
 
-            if (workoutId.isNotEmpty() && workoutId != "current") {
+            if (currentWorkoutId.isNotEmpty() && currentWorkoutId != "current") {
                 // Load specific workout by ID
-                Log.d("DetailScreen", "Loading specific workout by ID: $workoutId")
-                WorkoutRepository().getWorkoutById(userId, workoutId) {
+                Log.d("DetailScreen", "Loading specific workout by ID: $currentWorkoutId")
+                WorkoutRepository().getWorkoutById(userId, currentWorkoutId) {
                     Log.d("DetailScreen", "Loaded workout: ${it?.name}, id: ${it?.id}")
                     workout = it
 
                     if (it != null) {
+                        // Sync header date with workout date
+                        val localDate = it.date.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                        selectedDate = localDate
                         Log.d(
                             "DetailScreen",
                             "Loading exercises for workout: ${it.id}"
@@ -249,17 +263,36 @@ fun DetailScreen(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { selectedDate = selectedDate.minusDays(1) }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Previous Day")
+                IconButton(onClick = {
+                    selectedDate = selectedDate.minusDays(1)
+                    currentWorkoutId = ""
+                }) { Icon(Icons.Default.ArrowBack, contentDescription = "Previous Day") }
+
+                // Inline date picker trigger
+                TextButton(onClick = {
+                    activity?.let { act ->
+                        val picker = com.google.android.material.datepicker.MaterialDatePicker.Builder.datePicker()
+                            .setTitleText("Select date")
+                            .setSelection(selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli())
+                            .build()
+                        picker.addOnPositiveButtonClickListener { millis ->
+                            selectedDate = java.time.Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
+                            currentWorkoutId = ""
+                        }
+                        picker.show(act.supportFragmentManager, "DETAIL_DATE_PICKER")
+                    }
+                }) {
+                    Text(
+                        text = selectedDate.format(DateTimeFormatter.ofPattern("dd MMMM", Locale.ENGLISH)),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
-            Text(
-                text = selectedDate.format(DateTimeFormatter.ofPattern("dd MMMM", Locale.ENGLISH)),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-            )
-                IconButton(onClick = { selectedDate = selectedDate.plusDays(1) }) {
-                Icon(Icons.Default.ArrowForward, contentDescription = "Next Day")
-            }
+
+                IconButton(onClick = {
+                    selectedDate = selectedDate.plusDays(1)
+                    currentWorkoutId = ""
+                }) { Icon(Icons.Default.ArrowForward, contentDescription = "Next Day") }
         }
             Spacer(modifier = Modifier.height(8.dp))
             
@@ -322,7 +355,13 @@ fun DetailScreen(
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = 6.dp),
+                                        .padding(vertical = 6.dp)
+                                        .clickable {
+                                            val wid = workout?.id ?: currentWorkoutId
+                                            if (!wid.isNullOrEmpty()) {
+                                                navController.navigate("exercise_detail/$wid/${exercise.id}")
+                                            }
+                                        },
                                     shape = RoundedCornerShape(24.dp),
                                     colors = CardDefaults.cardColors(
                                         containerColor = Color(
@@ -391,8 +430,12 @@ fun DetailScreen(
                     .padding(bottom = 24.dp), contentAlignment = Alignment.BottomEnd) {
             FloatingActionButton(
                 onClick = {
-                    if (workoutId.isNotEmpty()) {
-                        navController.navigate("add_exercise/$workoutId")
+                    val targetId = workout?.id
+                    if (!targetId.isNullOrEmpty()) {
+                        navController.navigate("add_exercise/$targetId")
+                    } else {
+                        // If no workout exists for this day, go create one first
+                        onAddWorkoutClick()
                     }
                 },
                 shape = CircleShape,

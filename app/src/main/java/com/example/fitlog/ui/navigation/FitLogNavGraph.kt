@@ -15,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.fitlog.data.local.preferences.UserPreferences
 import com.example.fitlog.ui.screens.addexercise.AddExerciseScreen
+import com.example.fitlog.ui.screens.exercisedetail.ExerciseDetailScreen
 import com.example.fitlog.ui.screens.daylist.DayListScreen
 import com.example.fitlog.ui.screens.detail.DetailScreen
 import com.example.fitlog.ui.screens.editworkout.EditWorkoutScreen
@@ -96,16 +97,24 @@ fun FitLogNavGraph(
                 )
             }
 
-            composable(ScreenRoute.EditWorkout.route) {
-                val viewModel: com.example.fitlog.ui.screens.home.HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-                val selectedDate = viewModel.selectedDate.value
+            composable(
+                route = "${ScreenRoute.EditWorkout.route}?date={date}",
+                arguments = listOf(
+                    navArgument("date") {
+                        type = NavType.LongType
+                        defaultValue = -1L
+                    }
+                )
+            ) { backStackEntry ->
+                val dateMillis = backStackEntry.arguments?.getLong("date") ?: -1L
                 EditWorkoutScreen(
                     onSave = { name, duration, calories ->
                         val user = FirebaseAuth.getInstance().currentUser
                         if (user != null) {
                             val userId = user.uid
                             val workoutId = UUID.randomUUID().toString()
-                            val startOfDay = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                            val targetDate = if (dateMillis > 0) java.time.Instant.ofEpochMilli(dateMillis).atZone(ZoneId.systemDefault()).toLocalDate() else LocalDate.now()
+                            val startOfDay = targetDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
                             val timestamp = Timestamp(startOfDay / 1000, ((startOfDay % 1000) * 1000000).toInt())
                             val workout = Workout(
                                 id = workoutId,
@@ -135,10 +144,17 @@ fun FitLogNavGraph(
             }
 
             composable(
-                route = "detail/{workoutId}",
-                arguments = listOf(navArgument("workoutId") { type = NavType.StringType })
+                route = "detail/{workoutId}?date={date}",
+                arguments = listOf(
+                    navArgument("workoutId") { type = NavType.StringType },
+                    navArgument("date") {
+                        type = NavType.LongType
+                        defaultValue = -1L
+                    }
+                )
             ) { backStackEntry ->
                 val workoutId = backStackEntry.arguments?.getString("workoutId") ?: ""
+                val dateMillis = backStackEntry.arguments?.getLong("date") ?: -1L
                 DetailScreen(
                     workoutId = workoutId,
                     onEditWorkoutClick = {
@@ -158,7 +174,8 @@ fun FitLogNavGraph(
                     onExerciseSelected = { exerciseTemplate ->
                         navController.navigate("${ScreenRoute.AddExercise.route}?exerciseId=${exerciseTemplate.id}")
                     },
-                    navController = navController
+                    navController = navController,
+                    initialDateMillis = if (dateMillis > 0) dateMillis else null
                 )
             }
 
@@ -189,6 +206,22 @@ fun FitLogNavGraph(
                 )
             }
 
+            composable(
+                route = "exercise_detail/{workoutId}/{exerciseId}",
+                arguments = listOf(
+                    navArgument("workoutId") { type = NavType.StringType },
+                    navArgument("exerciseId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val workoutId = backStackEntry.arguments?.getString("workoutId") ?: ""
+                val exerciseId = backStackEntry.arguments?.getString("exerciseId") ?: ""
+                ExerciseDetailScreen(
+                    workoutId = workoutId,
+                    exerciseId = exerciseId,
+                    onBack = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() }
+                )
+            }
 
         }
     }
