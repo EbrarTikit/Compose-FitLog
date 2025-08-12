@@ -47,10 +47,14 @@ class HomeViewModel(
     private val _exercises = MutableStateFlow<List<Exercise>>(emptyList())
     val exercises: StateFlow<List<Exercise>> = _exercises.asStateFlow()
 
+    private var currentWorkoutId: String = ""
+
     fun onDateSelected(date: LocalDate) {
         selectedDate.value = date
         loadHomeDataForDate(date)
     }
+
+    fun getCurrentWorkoutId(): String = currentWorkoutId
 
     fun loadHomeDataForDate(date: LocalDate) {
         viewModelScope.launch {
@@ -68,30 +72,34 @@ class HomeViewModel(
                 workoutRepository.getWorkoutByDateRange(userId, startTimestamp, endTimestamp) { workout ->
                     Log.d("FitLog", "workout result: $workout")
                     if (workout != null) {
+                        currentWorkoutId = workout.id
                         dailyPlan.value = DailyPlan(
                             day = date.dayOfMonth.toString(),
                             workoutType = workout.name,
                             dayOfWeek = date.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
                         )
                     } else {
+                        currentWorkoutId = ""
                         dailyPlan.value = DailyPlan("", "", "")
-                        // Load recent workouts if no workout is found for the specific date
-                        workoutRepository.getWorkouts(userId) { workoutList ->
-                            val recentWorkoutSummaries = workoutList.take(3).map { workout ->
-                                WorkoutSummary(
-                                    id = workout.id,
-                                    name = workout.name,
-                                    calories = workout.calories,
-                                    duration = workout.duration,
-                                    image = com.example.fitlog.R.drawable.ic_run,
-                                    progress = 0.7f // Default progress
-                                )
-                            }
-                            recentWorkouts.value = recentWorkoutSummaries
-                        }
                     }
                 }
+
+                // Always load recent workouts
+                workoutRepository.getWorkouts(userId) { workoutList ->
+                    val recentWorkoutSummaries = workoutList.take(3).map { workout ->
+                        WorkoutSummary(
+                            id = workout.id,
+                            name = workout.name,
+                            calories = workout.calories,
+                            duration = workout.duration,
+                            image = com.example.fitlog.R.drawable.ic_run,
+                            progress = 0.7f // Default progress
+                        )
+                    }
+                    recentWorkouts.value = recentWorkoutSummaries
+                }
             } else {
+                currentWorkoutId = ""
                 dailyPlan.value = DailyPlan("", "", "")
                 recentWorkouts.value = emptyList()
             }

@@ -10,4 +10,5 @@ sealed class ScreenRoute(val route: String) {
     object DayList : ScreenRoute("day_list")
     object Detail : ScreenRoute("detail")
     object AddExercise : ScreenRoute("add_exercise")
+    object ExerciseDetail : ScreenRoute("exercise_detail")
 }

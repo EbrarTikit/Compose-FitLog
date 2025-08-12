@@ -3,6 +3,9 @@ package com.example.fitlog.ui.screens.daylist
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -33,7 +36,7 @@ import java.util.*
 fun DayListScreen(
     initialDate: LocalDate = LocalDate.now(),
     workoutsForDate: (LocalDate) -> List<Pair<String, String>>,
-    onSeeAllClick: (LocalDate) -> Unit
+    onSeeAllClick: (LocalDate) -> Unit,
 ) {
     var selectedDate by remember { mutableStateOf(initialDate) }
     var currentMonth by remember { mutableStateOf(YearMonth.from(initialDate)) }
@@ -45,7 +48,9 @@ fun DayListScreen(
     val workouts = workoutsForDate(selectedDate)
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -146,11 +151,14 @@ fun DayListScreen(
             }
         }
 
+        // Original workouts bottom sheet
         if (bottomSheetState.isVisible) {
             ModalBottomSheet(onDismissRequest = {
                 coroutineScope.launch { bottomSheetState.hide() }
             }, sheetState = bottomSheetState) {
-                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
