@@ -1,119 +1,76 @@
 package com.example.fitlog.ui.screens.detail
 
+import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.fitlog.ui.theme.LightPurple
-import com.example.fitlog.ui.theme.LightPurple1
-import com.example.fitlog.ui.theme.PrimaryPurple
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.*
-import com.example.fitlog.data.model.Workout
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.fitlog.data.model.Exercise
 import com.example.fitlog.data.model.ExerciseTemplate
-import com.example.fitlog.data.repository.WorkoutRepository
+import com.example.fitlog.data.model.Workout
 import com.example.fitlog.data.repository.ExerciseRepository
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.Timestamp
-import android.util.Log
-import androidx.navigation.NavController
-import androidx.compose.ui.platform.LocalContext
-import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.navigation.compose.rememberNavController
+import com.example.fitlog.data.repository.WorkoutRepository
 import com.google.android.material.datepicker.MaterialDatePicker
-import androidx.compose.material.icons.filled.KeyboardArrowDown
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import java.time.LocalDate
 import java.time.Month
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Arrangement
-
-class DetailViewModel(
-    private val exerciseRepository: ExerciseRepository = ExerciseRepository()
-) : ViewModel() {
-
-    var exerciseTemplates by mutableStateOf<List<ExerciseTemplate>>(emptyList())
-        private set
-
-    var searchQuery by mutableStateOf("")
-        private set
-
-    var selectedCategory by mutableStateOf("All")
-        private set
-
-    var isLoading by mutableStateOf(false)
-        private set
-
-    val categories = listOf("All", "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio")
-
-    fun loadExerciseTemplates() {
-        isLoading = true
-        exerciseRepository.getExerciseTemplates { templates ->
-            exerciseTemplates = templates
-            isLoading = false
-        }
-    }
-
-    fun searchExercises(query: String) {
-        searchQuery = query
-        if (query.isBlank()) {
-            loadExerciseTemplates()
-        } else {
-            isLoading = true
-            exerciseRepository.searchExerciseTemplates(query) { templates ->
-                exerciseTemplates = templates
-                isLoading = false
-            }
-        }
-    }
-
-    fun filterByCategory(category: String) {
-        selectedCategory = category
-        if (category == "All") {
-            loadExerciseTemplates()
-        } else {
-            isLoading = true
-            exerciseRepository.getExerciseTemplatesByCategory(category) { templates ->
-                exerciseTemplates = templates
-                isLoading = false
-            }
-        }
-    }
-
-    init {
-        loadExerciseTemplates()
-    }
-}
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -131,8 +88,6 @@ fun DetailScreen(
     var workout by remember { mutableStateOf<Workout?>(null) }
     var exercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
     val userId = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-    val context = LocalContext.current
-    val activity = context as? AppCompatActivity
     val today = remember { LocalDate.now() }
     val initialFromArg: LocalDate? = remember(initialDateMillis) {
         initialDateMillis?.let { millis ->
@@ -158,37 +113,21 @@ fun DetailScreen(
 
     LaunchedEffect(currentWorkoutId, selectedDate) {
         if (userId.isNotEmpty()) {
-            Log.d(
-                "DetailScreen",
-                "Loading data for workoutId: $workoutId, userId: $userId, selectedDate: $selectedDate"
-            )
-
             if (currentWorkoutId.isNotEmpty() && currentWorkoutId != "current") {
                 // Load specific workout by ID
-                Log.d("DetailScreen", "Loading specific workout by ID: $currentWorkoutId")
                 WorkoutRepository().getWorkoutById(userId, currentWorkoutId) {
-                    Log.d("DetailScreen", "Loaded workout: ${it?.name}, id: ${it?.id}")
                     workout = it
 
                     if (it != null) {
                         // Sync header date with workout date
                         val localDate = it.date.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
                         selectedDate = localDate
-                        Log.d(
-                            "DetailScreen",
-                            "Loading exercises for workout: ${it.id}"
-                        )
                         ExerciseRepository().getExercises(userId, it.id) { exerciseList ->
-                            Log.d(
-                                "DetailScreen",
-                                "Loaded ${exerciseList.size} exercises: ${exerciseList.map { ex -> ex.name }}"
-                            )
                             exercises = exerciseList
                         }
                     }
                 }
             } else {
-                Log.d("DetailScreen", "Loading workout for selected date: $selectedDate")
                 val zoneId = ZoneId.systemDefault()
                 val startOfDay = selectedDate.atStartOfDay(zoneId).toInstant().toEpochMilli()
                 val endOfDay =
@@ -202,48 +141,23 @@ fun DetailScreen(
                     startTimestamp,
                     endTimestamp
                 ) { foundWorkout ->
-                    Log.d(
-                        "DetailScreen",
-                        "Found workout by date: ${foundWorkout?.name}, id: ${foundWorkout?.id}"
-                    )
                     workout = foundWorkout
                     if (foundWorkout != null) {
-                        Log.d(
-                            "DetailScreen",
-                            "Loading exercises for found workout: ${foundWorkout.id}"
-                        )
                         ExerciseRepository().getExercises(userId, foundWorkout.id) { exerciseList ->
-                            Log.d(
-                                "DetailScreen",
-                                "Loaded ${exerciseList.size} exercises for date workout: ${exerciseList.map { ex -> ex.name }}"
-                            )
                             if (exerciseList.isEmpty()) {
-                                Log.d(
-                                    "DetailScreen",
-                                    "No exercises found, creating sample exercises for testing"
-                                )
                                 ExerciseRepository().populateSampleExercises(
                                     userId,
                                     foundWorkout.id
                                 ) { success ->
                                     if (success) {
-                                        Log.d(
-                                            "DetailScreen",
-                                            "Sample exercises created, reloading..."
-                                        )
                                         // Reload exercises after creating samples
                                         ExerciseRepository().getExercises(
                                             userId,
                                             foundWorkout.id
                                         ) { newExerciseList ->
-                                            Log.d(
-                                                "DetailScreen",
-                                                "Reloaded ${newExerciseList.size} exercises after creating samples"
-                                            )
                                             exercises = newExerciseList
                                         }
                                     } else {
-                                        Log.e("DetailScreen", "Failed to create sample exercises")
                                         exercises = exerciseList
                                     }
                                 }
@@ -252,7 +166,6 @@ fun DetailScreen(
                             }
                         }
                     } else {
-                        Log.d("DetailScreen", "No workout found for date, setting empty exercises")
                         exercises = emptyList()
                     }
                 }
@@ -273,15 +186,15 @@ fun DetailScreen(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(
+                Box(
                     Modifier
                         .fillMaxWidth()
-                        .padding(top = 18.dp, start = 8.dp, end = 8.dp, bottom = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = onBackToHome, modifier = Modifier.size(44.dp)) {
+                    IconButton(onClick = onBackToHome,
+                        modifier = Modifier.align(Alignment.CenterStart)) {
                         Icon(
                             Icons.Filled.ArrowBack,
                             contentDescription = "Back",
@@ -289,6 +202,7 @@ fun DetailScreen(
                         )
                     }
                     Text(
+                        modifier = Modifier.align(Alignment.Center),
                         text = "Daily Plan",
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
@@ -473,6 +387,24 @@ fun DetailScreen(
                                     fontSize = 15.sp,
                                     modifier = Modifier.padding(vertical = 14.dp)
                                 )
+                                Spacer(Modifier.height(12.dp))
+                                Button(
+                                    onClick = {
+                                        val targetId = workout?.id
+                                        if (!targetId.isNullOrEmpty()) {
+                                            navController.navigate("add_exercise/$targetId")
+                                        } else {
+                                            onAddExerciseClick()
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(32.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7C5CFA)),
+                                    contentPadding = PaddingValues(vertical = 13.dp)
+                                ) {
+                                    Icon(Icons.Filled.Add, contentDescription = "Add Exercise", tint = Color.White)
+                                    Text("  Add Exercise", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                }
                             } else {
                                 Column(Modifier.fillMaxWidth()) {
                                     exercises.forEach { exercise ->

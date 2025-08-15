@@ -86,12 +86,10 @@ fun HomeScreen(
     navController: NavController,
     viewModel: HomeViewModel = viewModel()
 ) {
-    val context = LocalContext.current
     val firebaseUser = FirebaseAuth.getInstance().currentUser
     val userName = firebaseUser?.displayName ?: firebaseUser?.email ?: "User"
     val currentDate by remember { derivedStateOf { viewModel.selectedDate.value.toString() } }
 
-    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
 
     val dailyPlan by viewModel.dailyPlan
