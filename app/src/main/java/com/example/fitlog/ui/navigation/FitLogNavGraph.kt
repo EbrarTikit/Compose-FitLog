@@ -33,6 +33,42 @@ import androidx.navigation.NavType
 import java.time.ZoneId
 import java.time.LocalDate
 import com.google.firebase.Timestamp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.ShowChart
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.dp
+import com.example.fitlog.ui.screens.logtracking.AnalyticsScreen
+import com.example.fitlog.ui.screens.profile.ProfileScreen
 
 @Composable
 fun FitLogNavGraph(
@@ -90,11 +126,7 @@ fun FitLogNavGraph(
             }
 
             composable(ScreenRoute.Home.route) {
-                val viewModel: com.example.fitlog.ui.screens.home.HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-                HomeScreen(
-                    navController = navController,
-                    viewModel = viewModel
-                )
+                MainTabsScaffold(rootNavController = navController)
             }
 
             composable(
@@ -229,3 +261,42 @@ fun FitLogNavGraph(
 
 fun NavHostController.navigateSingleTopTo(route: String) =
     this.navigate(route) { launchSingleTop = true }
+
+@Composable
+private fun MainTabsScaffold(rootNavController: NavHostController) {
+    var selectedIndex by remember { mutableStateOf(0) }
+    val tabs = listOf("Home", "Analytics", "Profile")
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                tabs.forEachIndexed { index, label ->
+                    val icon = when (label) {
+                        "Home" -> Icons.Filled.Home
+                        "Analytics" -> Icons.Filled.ShowChart
+                        else -> Icons.Filled.Person
+                    }
+                    NavigationBarItem(
+                        selected = selectedIndex == index,
+                        onClick = { selectedIndex = index },
+                        icon = { Icon(icon, contentDescription = label) },
+                        label = { Text(label) }
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+        Box(Modifier.padding(innerPadding)) {
+            when (selectedIndex) {
+                0 -> {
+                    val viewModel: com.example.fitlog.ui.screens.home.HomeViewModel =
+                        androidx.lifecycle.viewmodel.compose.viewModel()
+                    HomeScreen(navController = rootNavController, viewModel = viewModel)
+                }
+
+                1 -> AnalyticsScreen()
+                2 -> ProfileScreen()
+            }
+        }
+    }
+}
