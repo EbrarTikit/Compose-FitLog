@@ -86,12 +86,10 @@ fun HomeScreen(
     navController: NavController,
     viewModel: HomeViewModel = viewModel()
 ) {
-    val context = LocalContext.current
     val firebaseUser = FirebaseAuth.getInstance().currentUser
     val userName = firebaseUser?.displayName ?: firebaseUser?.email ?: "User"
     val currentDate by remember { derivedStateOf { viewModel.selectedDate.value.toString() } }
 
-    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
 
     val dailyPlan by viewModel.dailyPlan
@@ -107,19 +105,13 @@ fun HomeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(Color(0xFFCDC9FF), Color(0xFFE4E4FB), Color(0xFFEDEAFB)),
-                    startY = 0.0f, endY = 1400f
-                )
-            )
+            .background(Color.White)
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 36.dp)
         ) {
             item {
-                Spacer(modifier = Modifier.height(36.dp))
                 UserGreetingSectionModern(
                     userName,
                     currentDate,
@@ -312,7 +304,7 @@ fun MyPlanCardModern(
             .height(72.dp)
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(30.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFE5E5EA)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
         Row(
@@ -459,7 +451,7 @@ fun ActivityStatusCardFuturistic(item: ActivityStatusItem, modifier: Modifier = 
     Card(
         modifier = modifier.height(90.dp),
         shape = RoundedCornerShape(30.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFE5E5EA)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
         Column(
@@ -539,7 +531,7 @@ fun WorkoutItemCardModern(workout: WorkoutSummary, onWorkoutClick: (String) -> U
             .clickable { onWorkoutClick(workout.id) },
         shape = RoundedCornerShape(30.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFE5E5EA)
+            containerColor = Color(0xFFFFFFFF)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
@@ -560,14 +552,7 @@ fun WorkoutItemCardModern(workout: WorkoutSummary, onWorkoutClick: (String) -> U
                     )
                     .clip(RoundedCornerShape(16.dp))
                     .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                Color(0xFF7C5CFA).copy(alpha = 0.8f),
-                                Color(0xFF7C5CFA).copy(alpha = 0.6f)
-                            ),
-                            start = Offset.Zero,
-                            end = Offset.Infinite
-                        )
+                        Color(0xFFFFFFFF)
                     ),
                 contentAlignment = Alignment.Center
             ) {

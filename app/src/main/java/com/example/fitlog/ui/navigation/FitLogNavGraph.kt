@@ -1,5 +1,17 @@
 package com.example.fitlog.ui.navigation
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.ShowChart
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -8,31 +20,36 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.fitlog.data.local.preferences.UserPreferences
+import com.example.fitlog.data.model.Workout
+import com.example.fitlog.data.repository.WorkoutRepository
 import com.example.fitlog.ui.screens.addexercise.AddExerciseScreen
-import com.example.fitlog.ui.screens.exercisedetail.ExerciseDetailScreen
 import com.example.fitlog.ui.screens.daylist.DayListScreen
 import com.example.fitlog.ui.screens.detail.DetailScreen
 import com.example.fitlog.ui.screens.editworkout.EditWorkoutScreen
+import com.example.fitlog.ui.screens.exercisedetail.ExerciseDetailScreen
 import com.example.fitlog.ui.screens.home.HomeScreen
+import com.example.fitlog.ui.screens.logtracking.AnalyticsScreen
 import com.example.fitlog.ui.screens.onboarding.OnboardingScreen
+import com.example.fitlog.ui.screens.profile.ProfileScreen
 import com.example.fitlog.ui.screens.signin.SignInScreen
 import com.example.fitlog.ui.screens.signup.SignUpScreen
 import com.example.fitlog.ui.screens.splash.SplashScreen
-import com.google.firebase.auth.FirebaseAuth
-import java.util.UUID
-import com.example.fitlog.data.repository.WorkoutRepository
-import com.example.fitlog.data.model.Workout
-import kotlinx.coroutines.launch
-import androidx.navigation.NavType
-import java.time.ZoneId
-import java.time.LocalDate
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.ZoneId
+import java.util.UUID
 
 @Composable
 fun FitLogNavGraph(
@@ -90,11 +107,7 @@ fun FitLogNavGraph(
             }
 
             composable(ScreenRoute.Home.route) {
-                val viewModel: com.example.fitlog.ui.screens.home.HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-                HomeScreen(
-                    navController = navController,
-                    viewModel = viewModel
-                )
+                MainTabsScaffold(rootNavController = navController)
             }
 
             composable(
@@ -229,3 +242,49 @@ fun FitLogNavGraph(
 
 fun NavHostController.navigateSingleTopTo(route: String) =
     this.navigate(route) { launchSingleTop = true }
+
+@Composable
+private fun MainTabsScaffold(rootNavController: NavHostController) {
+    var selectedIndex by remember { mutableStateOf(0) }
+    val tabs = listOf("Home", "Analytics", "Profile")
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar(
+                modifier = Modifier.border(
+                    width = 1.dp,
+                    color = Color.Black.copy(alpha = 0.1f),
+                    shape = RectangleShape
+                ),
+                containerColor = Color(0XFFFFFFFF),
+            ) {
+                tabs.forEachIndexed { index, label ->
+                    val icon = when (label) {
+                        "Home" -> Icons.Filled.Home
+                        "Analytics" -> Icons.Filled.ShowChart
+                        else -> Icons.Filled.Person
+                    }
+                    NavigationBarItem(
+                        selected = selectedIndex == index,
+                        onClick = { selectedIndex = index },
+                        icon = { Icon(icon, contentDescription = label) },
+                        label = { Text(label) }
+                    )
+                }
+            }
+        },
+    ) { innerPadding ->
+        Box(Modifier.padding(innerPadding)) {
+            when (selectedIndex) {
+                0 -> {
+                    val viewModel: com.example.fitlog.ui.screens.home.HomeViewModel =
+                        androidx.lifecycle.viewmodel.compose.viewModel()
+                    HomeScreen(navController = rootNavController, viewModel = viewModel)
+                }
+
+                1 -> AnalyticsScreen()
+                2 -> ProfileScreen()
+            }
+        }
+    }
+}
