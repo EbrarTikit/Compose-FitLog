@@ -269,12 +269,7 @@ fun DetailScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Color(0xFFE5E7FB), Color(0xFFF4F5FC)),
-                        startY = 0f, endY = 1600f
-                    )
-                )
+                .background(Color.White)
         ) {
             Column(
                 modifier = Modifier
